@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/VictoriaMetrics/fastcache v1.5.7
+	github.com/allegro/bigcache/v2 v2.2.4
 	github.com/aristanetworks/goarista v0.0.0-20200812190859-4cb0e71f3c0e
 	github.com/chain5j/log15 v1.0.6
 	github.com/davecgh/go-spew v1.1.1
