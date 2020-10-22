@@ -1,0 +1,179 @@
+// description: chain5j-core
+// 
+// @author: xwc1125
+// @date: 2020/2/6
+package types
+
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/chain5j/chain5j-pkg/codec/rlp"
+	log "github.com/chain5j/log15"
+	"io"
+	"reflect"
+)
+
+var (
+	_                  Address = DomainAddress{}
+	EmptyDomainAddress         = DomainAddress{}
+)
+
+type DomainAddress struct {
+	Addr   Address `json:"addr"`   // 地址
+	Domain string  `json:"domain"` // 域
+}
+
+// 参数必须为指针类型
+func NewDomainAddress(addr Address) (DomainAddress, error) {
+	if addr == nil {
+		return EmptyDomainAddress, errors.New("addr is nil")
+	}
+	typeOf := reflect.TypeOf(addr)
+	if typeOf.Kind() != reflect.Ptr {
+		log.Error("addr is not Pointer")
+		return EmptyDomainAddress, errors.New("addr is not Pointer")
+	}
+	return DomainAddress{
+		Addr: addr,
+	}, nil
+}
+
+func ToDomainAddress(addr Address) (DomainAddress, error) {
+	if addr == nil {
+		return EmptyDomainAddress, errors.New("addr is nil")
+	}
+	// TODO 可以通过address获取域
+	return DomainAddress{
+		Addr:   addr,
+		Domain: addr.String(),
+	}, nil
+}
+
+func StrToDomainAddress(addr string) (DomainAddress, error) {
+	if addr == "" {
+		return EmptyDomainAddress, errors.New("addr is empty")
+	}
+	// TODO 可以通过addr获取地址
+	return DomainAddress{
+		Domain: addr,
+	}, nil
+}
+
+func (a DomainAddress) Len() int {
+	return a.Addr.Len()
+}
+
+func (a DomainAddress) Bytes() []byte {
+	if a == EmptyDomainAddress {
+		return nil
+	}
+	if !a.Addr.Nil() {
+		return a.Addr.Bytes()
+	}
+	return []byte(a.Domain)
+}
+
+func (a DomainAddress) String() string {
+	return a.Domain
+}
+
+func (a DomainAddress) FromBytes(bytes []byte) (Address, error) {
+	if a.Addr == nil {
+		return nil, errors.New("addr is nil")
+	}
+	fromBytes, err := a.Addr.FromBytes(bytes)
+	if err != nil {
+		return nil, err
+	}
+	return ToDomainAddress(fromBytes)
+}
+
+func (a DomainAddress) FromStr(addr string) (Address, error) {
+	addr1, err := a.Addr.FromStr(addr)
+	if err != nil {
+		return nil, err
+	}
+	if addr1 != nil {
+		return ToDomainAddress(addr1)
+	}
+	return StrToDomainAddress(addr)
+}
+
+func (a DomainAddress) Validate(addr string) bool {
+	if a.Addr.Validate(addr) {
+		return true
+	}
+	// TODO 校验domain是否合法
+	return false
+}
+
+func (a DomainAddress) Nil() bool {
+	if a == EmptyDomainAddress {
+		return true
+	}
+	if a.Domain == "" && a.Addr.Nil() {
+		return true
+	}
+	return false
+}
+
+func (a DomainAddress) Hash() Hash {
+	return a.Addr.Hash()
+}
+
+func (a DomainAddress) Format(s fmt.State, c rune) {
+	fmt.Fprintf(s, "%"+string(c), a.Addr.Bytes())
+}
+
+func (a *DomainAddress) UnmarshalJSON(data []byte) error {
+	type erased DomainAddress
+	e := erased{
+		Addr: a.Addr,
+	}
+	err := json.Unmarshal(data, &e)
+	if err == nil {
+		a.Addr = e.Addr
+		a.Domain = e.Domain
+		return nil
+	}
+
+	var input string
+	err = json.Unmarshal(data, &input)
+	if err != nil {
+		return err
+	}
+	b, err := a.FromStr(input)
+	if err != nil {
+		return err
+	}
+	if b.Nil() {
+		return errors.New("data is not domainAddress")
+	}
+	*a = b.(DomainAddress)
+	return nil
+}
+
+func (a DomainAddress) Value() (driver.Value, error) {
+	return a.Bytes(), nil
+}
+
+func (a *DomainAddress) EncodeRLP(w io.Writer) error {
+	return rlp.Encode(w, a.Bytes())
+}
+
+func (a *DomainAddress) DecodeRLP(s *rlp.Stream) error {
+	var bytes []byte
+	err := s.Decode(&bytes)
+	if err != nil {
+		log.Error("DecodeTxsRLP", "err", err)
+		return err
+	}
+	domainAddress, err := a.FromBytes(bytes)
+	if err != nil {
+		return err
+	}
+	*a = domainAddress.(DomainAddress)
+	return nil
+}

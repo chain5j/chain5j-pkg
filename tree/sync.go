@@ -82,7 +82,7 @@ func NewSync(root types.Hash, database database.KeyValueReader, callback LeafCal
 		database: database,
 		membatch: newSyncMemBatch(),
 		requests: make(map[types.Hash]*request),
-		queue:    prque.New(nil),
+		queue:    prque.New(),
 		bloom:    bloom,
 	}
 	ts.AddSubTrie(root, 0, types.Hash{}, callback)
@@ -245,7 +245,7 @@ func (s *Sync) schedule(req *request) {
 		return
 	}
 	// Schedule the request for future retrieval
-	s.queue.Push(req.hash, int64(req.depth))
+	s.queue.Push(req.hash, float32(req.depth))
 	s.requests[req.hash] = req
 }
 

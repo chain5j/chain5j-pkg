@@ -19,7 +19,7 @@ package tree
 import (
 	"bytes"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/coder/rlp"
+	"github.com/chain5j/chain5j-pkg/codec/rlp"
 	"github.com/chain5j/chain5j-pkg/database"
 	"github.com/chain5j/chain5j-pkg/types"
 	log "github.com/chain5j/log15"

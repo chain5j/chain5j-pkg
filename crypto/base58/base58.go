@@ -7,8 +7,8 @@ import (
 
 var b58Alphabet = []byte("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
 
-// Base58Encode encodes a byte array to Base58
-func Base58Encode(input []byte) []byte {
+// Encode encodes a byte array to Base58
+func Encode(input []byte) []byte {
 	var result []byte
 
 	x := big.NewInt(0).SetBytes(input)
@@ -27,13 +27,13 @@ func Base58Encode(input []byte) []byte {
 		result = append(result, b58Alphabet[0])
 	}
 
-	ReverseBytes(result)
+	reverseBytes(result)
 
 	return result
 }
 
-// Base58Decode decodes Base58-encoded data
-func Base58Decode(input []byte) []byte {
+// Decode decodes Base58-encoded data
+func Decode(input []byte) []byte {
 	result := big.NewInt(0)
 
 	for _, b := range input {
@@ -52,7 +52,7 @@ func Base58Decode(input []byte) []byte {
 }
 
 // ReverseBytes reverses a byte array
-func ReverseBytes(data []byte) {
+func reverseBytes(data []byte) {
 	for i, j := 0, len(data)-1; i < j; i, j = i+1, j-1 {
 		data[i], data[j] = data[j], data[i]
 	}

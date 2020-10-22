@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/coder/rlp"
 	"github.com/chain5j/chain5j-pkg/crypto/keccak"
 	"github.com/chain5j/chain5j-pkg/database/memorydb"
 	"github.com/chain5j/chain5j-pkg/types"

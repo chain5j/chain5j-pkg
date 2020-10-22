@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"container/heap"
 	"errors"
-	"github.com/chain5j/chain5j-pkg/coder/rlp"
+	"github.com/chain5j/chain5j-pkg/codec/rlp"
 	"github.com/chain5j/chain5j-pkg/types"
 )
 
