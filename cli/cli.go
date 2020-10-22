@@ -43,8 +43,8 @@ func NewCli(a *AppInfo) *Cli {
 }
 
 // 初始化
-func (c *Cli) Init() error {
-	err := c.initFlags()
+func (cli *Cli) Init() error {
+	err := cli.initFlags()
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (cli *Cli) initFlags() error {
 	rootFlags.StringVar(&cli.DataDir, "datadir", ioutil.DefaultDataDir(), "Data directory for the databases and keystore")
 	// host
 	rootFlags.StringP("host", "H", "127.0.0.1:9545", "server node ip:port")
-	rootFlags.Int32("rpcport", 9545, "")
+	rootFlags.Int32("rpcport", 9545, "rpc port(default is 9545)")
 	// configFile返回的值，config:参数名，value:默认值，usage:用法说明
 	rootFlags.StringVar(&configFile, "config", "./conf/config.yaml", "config file (default is ./conf/config.yaml)")
 	//rootFlags.StringVar(&configEnv, "env", "dev", "config env(default is dev)")
@@ -102,34 +102,34 @@ func (cli *Cli) initFlags() error {
 		}
 
 		cli.viper = viper.GetViper()
-		cli.watchConfig()
+		//cli.watchConfig()
 	})
 
 	return nil
 }
 
 // 监听配置文件是否改变,用于热更新
-func (c *Cli) watchConfig() {
+func (cli *Cli) watchConfig() {
 	viper.WatchConfig()
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Printf("Config file changed: %s\n", e.Name)
-		if c.readConfigFunc != nil {
-			c.readConfigFunc(c.viper)
+		if cli.readConfigFunc != nil {
+			cli.readConfigFunc(cli.viper)
 		}
 	})
 }
 
-func (c *Cli) GetCommands() []CommandFunc {
+func (cli *Cli) GetCommands() []CommandFunc {
 	return commands
 }
-func (c *Cli) GetViper() *viper.Viper {
-	return c.viper
+func (cli *Cli) GetViper() *viper.Viper {
+	return cli.viper
 }
 
 // 添加所有的命令
-func (c *Cli) AddCommands(cmds []CommandFunc) {
+func (cli *Cli) AddCommands(cmds []CommandFunc) {
 	for _, cmd := range cmds {
-		c.rootCmd.AddCommand(cmd(c))
+		cli.rootCmd.AddCommand(cmd(cli))
 	}
 }
 
@@ -139,9 +139,9 @@ func AddCommand(cmd CommandFunc) {
 }
 
 // 执行命令
-func (c *Cli) Execute(readConfigFunc func(viper *viper.Viper)) {
-	c.readConfigFunc = readConfigFunc
-	err := c.rootCmd.Execute()
+func (cli *Cli) Execute(readConfigFunc func(viper *viper.Viper)) {
+	cli.readConfigFunc = readConfigFunc
+	err := cli.rootCmd.Execute()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -152,15 +152,19 @@ func (c *Cli) Execute(readConfigFunc func(viper *viper.Viper)) {
 func (cli *Cli) Get(key string) interface{} {
 	return cli.viper.Get(key)
 }
+
 func (cli *Cli) GetString(key string) string {
 	return cli.viper.GetString(key)
 }
+
 func (cli *Cli) GetInt(key string) int {
 	return cli.viper.GetInt(key)
 }
+
 func (cli *Cli) GetInt64(key string) int64 {
 	return cli.viper.GetInt64(key)
 }
+
 func (cli *Cli) GetBool(key string) bool {
 	return cli.viper.GetBool(key)
 }

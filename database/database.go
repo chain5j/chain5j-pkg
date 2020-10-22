@@ -50,56 +50,17 @@ type KeyValueStore interface {
 	io.Closer
 }
 
-// AncientReader contains the methods required to read from immutable ancient data.
-//type AncientReader interface {
-//	// HasAncient returns an indicator whether the specified data exists in the
-//	// ancient store.
-//	HasAncient(kind string, number uint64) (bool, error)
-//
-//	// Ancient retrieves an ancient binary blob from the append-only immutable files.
-//	Ancient(kind string, number uint64) ([]byte, error)
-//
-//	// Ancients returns the ancient item numbers in the ancient store.
-//	Ancients() (uint64, error)
-//
-//	// AncientSize returns the ancient size of the specified category.
-//	AncientSize(kind string) (uint64, error)
-//}
-
-// AncientWriter contains the methods required to write to immutable ancient data.
-//type AncientWriter interface {
-//	// AppendAncient injects all binary blobs belong to block at the end of the
-//	// append-only immutable table files.
-//	AppendAncient(number uint64, hash, header, body, receipt, td []byte) error
-//
-//	// TruncateAncients discards all but the first n ancient data from the ancient store.
-//	TruncateAncients(n uint64) error
-//
-//	// Sync flushes all in-memory ancient store data to disk.
-//	Sync() error
-//}
-
 // Reader contains the methods required to read data from both key-value as well as
 // immutable ancient data.
 type Reader interface {
 	KeyValueReader
-	//AncientReader
 }
 
 // Writer contains the methods required to write data to both key-value as well as
 // immutable ancient data.
 type Writer interface {
 	KeyValueWriter
-	//AncientWriter
 }
-
-// AncientStore contains all the methods required to allow handling different
-// ancient data stores backing immutable chain data store.
-//type AncientStore interface {
-//	AncientReader
-//	AncientWriter
-//	io.Closer
-//}
 
 // Database contains all the methods required by the high level database to not
 // only access the key-value data store but also the chain freezer.

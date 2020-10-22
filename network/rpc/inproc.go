@@ -1,4 +1,4 @@
-// Copyright 2014 The go-ethereum Authors
+// Copyright 2016 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
 // The go-ethereum library is free software: you can redistribute it and/or modify
@@ -14,27 +14,20 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-package derivesha
+package rpc
 
 import (
-	"bytes"
-	"github.com/chain5j/chain5j-pkg/coder/rlp"
-	"github.com/chain5j/chain5j-pkg/tree"
-	"github.com/chain5j/chain5j-pkg/types"
+	"context"
+	"net"
 )
 
-type DerivableList interface {
-	Len() int
-	GetRlp(i int) []byte
-}
-
-func DeriveSha(list DerivableList) types.Hash {
-	keybuf := new(bytes.Buffer)
-	trie := new(tree.Trie)
-	for i := 0; i < list.Len(); i++ {
-		keybuf.Reset()
-		rlp.Encode(keybuf, uint(i))
-		trie.Update(keybuf.Bytes(), list.GetRlp(i))
-	}
-	return trie.Hash()
+// DialInProc attaches an in-process connection to the given RPC server.
+func DialInProc(handler *Server) *Client {
+	initctx := context.Background()
+	c, _ := newClient(initctx, func(context.Context) (net.Conn, error) {
+		p1, p2 := net.Pipe()
+		go handler.ServeCodec(NewJSONCodec(p1), OptionMethodInvocation|OptionSubscriptions)
+		return p2, nil
+	})
+	return c
 }

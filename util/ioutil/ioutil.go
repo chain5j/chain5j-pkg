@@ -34,11 +34,11 @@ func DefaultDataDir() string {
 	home := homeDir()
 	if home != "" {
 		if runtime.GOOS == "darwin" {
-			return filepath.Join(home, "Library", "Pangu")
+			return filepath.Join(home, "Library", "Chain5j")
 		} else if runtime.GOOS == "windows" {
-			return filepath.Join(home, "AppData", "Roaming", "Pangu")
+			return filepath.Join(home, "AppData", "Roaming", "Chain5j")
 		} else {
-			return filepath.Join(home, ".pangu")
+			return filepath.Join(home, ".chain5j")
 		}
 	}
 	// As we cannot guess a stable location, return empty and handle later
