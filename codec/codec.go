@@ -4,22 +4,9 @@
 // @date: 2020/10/19
 package codec
 
-import (
-	"github.com/chain5j/chain5j-pkg/codec/rlp"
-)
+import "github.com/chain5j/chain5j-pkg/codec/rlp"
 
-var coder Codec
-
-func RegisterCodec(codec Codec) {
-	coder = codec
-}
-
-func Coder() Codec {
-	if coder == nil {
-		coder = rlp.NewCodec()
-	}
-	return coder
-}
+var DefaultCodec = rlp.NewCodec()
 
 type Codec interface {
 	Encoder

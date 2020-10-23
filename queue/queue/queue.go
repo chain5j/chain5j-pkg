@@ -1,7 +1,7 @@
-// description: chain5j-pkg
-// 
+// description: chainmaker-go
+//
 // @author: xwc1125
-// @date: 2019/11/25
+// @date: 2020/10/20
 package queue
 
 import (
@@ -161,14 +161,24 @@ func (queue *LinkedQueue) del(cNode *node, e Element) *node {
 	if cNode == nil {
 		return nil
 	}
+	nNode := *cNode
 	prev := cNode.prev
 	next2 := cNode.next
 	if cNode.value == e {
 		// 查找元素
-		prev.next = next2
-		next2.prev = prev
+		if prev == nil && next2 == nil {
+			queue.head = nil
+			queue.tail = nil
+		}
+		if prev != nil {
+			prev.next = next2
+		}
+		if next2 != nil {
+			next2.prev = prev
+		}
+		cNode.value = nil
 		queue.size--
-		return cNode
+		return &nNode
 	}
 	return queue.del(next2, e)
 }
@@ -228,11 +238,12 @@ func (queue *LinkedQueue) Clear() bool {
 func (queue *LinkedQueue) remove() {
 	if !queue.IsEmpty() {
 		firstNode := queue.head
-		queue.head = firstNode.next
-		firstNode.next = nil
-		firstNode.value = nil
+		if firstNode != nil {
+			queue.head = firstNode.next
+			firstNode.next = nil
+			firstNode.value = nil
+		}
 		queue.size--
-
 		queue.remove()
 	}
 }

@@ -10,6 +10,11 @@ import (
 	"os"
 )
 
+var (
+	// 命令行
+	RootCli *Cli
+)
+
 // CommandFunc 代表了一个子命令，用于往Cli注册子命令
 type CommandFunc func(c *Cli) *cobra.Command
 
@@ -37,9 +42,11 @@ func NewCli(a *AppInfo) *Cli {
 			fmt.Println(a.Welcome)
 		},
 	}
-	return &Cli{
+	RootCli = &Cli{
 		rootCmd: rootCmd,
 	}
+
+	return RootCli
 }
 
 // 初始化
@@ -72,7 +79,7 @@ func (cli *Cli) initFlags() error {
 	rootFlags.StringVar(&cli.DataDir, "datadir", ioutil.DefaultDataDir(), "Data directory for the databases and keystore")
 	// host
 	rootFlags.StringP("host", "H", "127.0.0.1:9545", "server node ip:port")
-	rootFlags.Int32("rpcport", 9545, "rpc port(default is 9545)")
+	rootFlags.Int32P("rpcport", "p", 9545, "rpc port(default is 9545)")
 	// configFile返回的值，config:参数名，value:默认值，usage:用法说明
 	rootFlags.StringVar(&configFile, "config", "./conf/config.yaml", "config file (default is ./conf/config.yaml)")
 	//rootFlags.StringVar(&configEnv, "env", "dev", "config env(default is dev)")

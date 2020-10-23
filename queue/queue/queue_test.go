@@ -1,7 +1,7 @@
-// description: chain5j-pkg
-// 
+// description: chainmaker-go
+//
 // @author: xwc1125
-// @date: 2019/11/25
+// @date: 2020/10/20
 package queue
 
 import (
@@ -65,3 +65,26 @@ func TestNew(t *testing.T) {
 	spew.Dump(linkedQueue.PeekFront())
 }
 
+func TestDel(t *testing.T) {
+	queue := NewLinkedQueue()
+	queue.PushFront("1")
+	queue.Remove("1")
+
+	queue.PushBack("2")
+	queue.Remove("2")
+
+	queue.PushFront("3")
+	queue.PollFront()
+	queue.Remove("3")
+
+	queue.PushFront("1")
+	queue.PushBack("2")
+	queue.PushFront("3")
+	queue.PollFront()
+	queue.PollBack()
+	//queue.Remove("1")
+	queue.Remove("3")
+	queue.Remove("2")
+
+	queue.Clear()
+}
