@@ -11,6 +11,7 @@ require (
 	github.com/deckarep/golang-set v1.7.1
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/json-iterator/go v1.1.9
+	github.com/pborman/uuid v1.2.1
 	github.com/rs/cors v1.7.0
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.1
