@@ -28,7 +28,7 @@ func Unmarshal(data []byte, v interface{}) error {
 	return jsoniter.Unmarshal(data, v)
 }
 
-func NewDecoer(r io.Reader) *jsoniter.Decoder {
+func NewDecoder(r io.Reader) *jsoniter.Decoder {
 	return jsoniter.NewDecoder(r)
 }
 

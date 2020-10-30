@@ -1,41 +1,43 @@
-// description: chain5j-pkg
-// 
+// description: chainmaker-go
+//
 // @author: xwc1125
-// @date: 2019/11/25
+// @date: 2020/10/20
 package queue
 
 import (
 	"fmt"
-	log "github.com/chain5j/log15"
+	"log"
 	"sync"
 )
 
 type Element interface{}
 
 type Queue interface {
-	Push(e Element)        // 向队尾添加元素
-	Peek() Element         // 查看头部的元素
-	PeekBottom() Element   // 查看尾部的元素
-	Poll() Element         // 移除头部的元素
-	PollBottom() Element   // 移除尾部的元素
-	Delete(e Element) bool // 删除一个值
+	PushFront(e Element)   // 向队头添加元素
+	PushBack(e Element)    // 向队尾添加元素
+	PeekFront() Element    // 查看头部的元素
+	PeekBack() Element     // 查看尾部的元素
+	PollFront() Element    // 移除头部的元素
+	PollBack() Element     // 移除尾部的元素
+	Remove(e Element) bool // 删除一个值
 	Exist(e Element) bool  // 是否存在
 	Size() int             // 获取队列的元素个数
 	IsEmpty() bool         // 判断队列是否是空
 	Clear() bool           // 清空队列
+	NewIterator() *Iterator
 }
 
 type node struct {
-	value Element
-	prev  *node
-	next  *node
+	value Element // 当前节点的值
+	prev  *node   // 前一个节点
+	next  *node   // 下一个节点
 }
 
 type LinkedQueue struct {
-	head *node
-	tail *node
-	size int
 	m    sync.Mutex
+	head *node // 头节点
+	tail *node // 尾节点
+	size int   // 大小
 }
 
 func NewLinkedQueue() *LinkedQueue {
@@ -44,7 +46,23 @@ func NewLinkedQueue() *LinkedQueue {
 	}
 }
 
-func (queue *LinkedQueue) Push(e Element) {
+func (queue *LinkedQueue) PushFront(e Element) {
+	queue.m.Lock()
+	defer queue.m.Unlock()
+
+	newNode := &node{e, nil, queue.head}
+	if queue.head == nil {
+		queue.head = newNode
+		queue.tail = newNode
+	} else {
+		queue.head.prev = newNode
+		queue.head = newNode
+	}
+	queue.size++
+	newNode = nil
+}
+
+func (queue *LinkedQueue) PushBack(e Element) {
 	queue.m.Lock()
 	defer queue.m.Unlock()
 
@@ -60,14 +78,14 @@ func (queue *LinkedQueue) Push(e Element) {
 	newNode = nil
 }
 
-func (queue *LinkedQueue) Peek() Element {
+func (queue *LinkedQueue) PeekFront() Element {
 	if queue.head == nil {
 		return nil
 	}
 	return queue.head.value
 }
 
-func (queue *LinkedQueue) PeekBottom() Element {
+func (queue *LinkedQueue) PeekBack() Element {
 	if queue.tail == nil {
 		return nil
 	}
@@ -75,7 +93,7 @@ func (queue *LinkedQueue) PeekBottom() Element {
 }
 
 // 移除队列中最前面的元素
-func (queue *LinkedQueue) Poll() Element {
+func (queue *LinkedQueue) PollFront() Element {
 	queue.m.Lock()
 	defer queue.m.Unlock()
 	if queue.IsEmpty() {
@@ -98,7 +116,7 @@ func (queue *LinkedQueue) Poll() Element {
 	return firstNode.value
 }
 
-func (queue *LinkedQueue) PollBottom() Element {
+func (queue *LinkedQueue) PollBack() Element {
 	queue.m.Lock()
 	defer queue.m.Unlock()
 	if queue.IsEmpty() {
@@ -122,7 +140,7 @@ func (queue *LinkedQueue) PollBottom() Element {
 	return latestNode.value
 }
 
-func (queue *LinkedQueue) Delete(e Element) bool {
+func (queue *LinkedQueue) Remove(e Element) bool {
 	queue.m.Lock()
 	defer queue.m.Unlock()
 	if queue.IsEmpty() {
@@ -140,14 +158,27 @@ func (queue *LinkedQueue) del(cNode *node, e Element) *node {
 	if queue.IsEmpty() {
 		return nil
 	}
+	if cNode == nil {
+		return nil
+	}
+	nNode := *cNode
 	prev := cNode.prev
 	next2 := cNode.next
 	if cNode.value == e {
 		// 查找元素
-		prev.next = next2
-		next2.prev = prev
+		if prev == nil && next2 == nil {
+			queue.head = nil
+			queue.tail = nil
+		}
+		if prev != nil {
+			prev.next = next2
+		}
+		if next2 != nil {
+			next2.prev = prev
+		}
+		cNode.value = nil
 		queue.size--
-		return cNode
+		return &nNode
 	}
 	return queue.del(next2, e)
 }
@@ -168,7 +199,7 @@ func (queue *LinkedQueue) Exist(e Element) bool {
 func (queue *LinkedQueue) exist(cNode *node, e Element) bool {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error("LinkedQueue exist", "err", err)
+			log.Println("LinkedQueue exist", "err", err)
 		}
 	}()
 	if queue.IsEmpty() {
@@ -207,11 +238,12 @@ func (queue *LinkedQueue) Clear() bool {
 func (queue *LinkedQueue) remove() {
 	if !queue.IsEmpty() {
 		firstNode := queue.head
-		queue.head = firstNode.next
-		firstNode.next = nil
-		firstNode.value = nil
+		if firstNode != nil {
+			queue.head = firstNode.next
+			firstNode.next = nil
+			firstNode.value = nil
+		}
 		queue.size--
-
 		queue.remove()
 	}
 }

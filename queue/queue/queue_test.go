@@ -1,7 +1,7 @@
-// description: chain5j-pkg
-// 
+// description: chainmaker-go
+//
 // @author: xwc1125
-// @date: 2019/11/25
+// @date: 2020/10/20
 package queue
 
 import (
@@ -18,63 +18,73 @@ func TestNew(t *testing.T) {
 	linkedQueue := NewLinkedQueue()
 
 	for i := int64(0); i < 5; i++ {
-		linkedQueue.Push(Element(item{
+		linkedQueue.PushFront(Element(item{
 			i,
 			i,
 		}))
 	}
-	spew.Dump(linkedQueue.Peek())
-	spew.Dump(linkedQueue.PeekBottom())
-	linkedQueue.Poll()
-	spew.Dump(linkedQueue.Peek())
-	spew.Dump(linkedQueue.PeekBottom())
-	linkedQueue.Poll()
-	spew.Dump(linkedQueue.Peek())
-	spew.Dump(linkedQueue.PeekBottom())
-	linkedQueue.PollBottom()
-	spew.Dump(linkedQueue.Peek())
-	spew.Dump(linkedQueue.PeekBottom())
-	linkedQueue.Poll()
-	spew.Dump(linkedQueue.Peek())
-	spew.Dump(linkedQueue.PeekBottom())
-	linkedQueue.Poll()
-	spew.Dump(linkedQueue.Peek())
-	spew.Dump(linkedQueue.PeekBottom())
-	linkedQueue.PollBottom()
-	spew.Dump(linkedQueue.Peek())
-	spew.Dump(linkedQueue.PeekBottom())
-	linkedQueue.Push(Element(item{
+	for i := 0; i < 2; i++ {
+		spew.Dump(linkedQueue.PeekFront())
+		spew.Dump(linkedQueue.PeekBack())
+		linkedQueue.PollFront()
+	}
+	spew.Dump(linkedQueue.PeekFront())
+	spew.Dump(linkedQueue.PeekBack())
+	linkedQueue.PollBack()
+	for i := 0; i < 2; i++ {
+		spew.Dump(linkedQueue.PeekFront())
+		spew.Dump(linkedQueue.PeekBack())
+		linkedQueue.PollFront()
+	}
+	spew.Dump(linkedQueue.PeekFront())
+	spew.Dump(linkedQueue.PeekBack())
+	linkedQueue.PollBack()
+	spew.Dump(linkedQueue.PeekFront())
+	spew.Dump(linkedQueue.PeekBack())
+	linkedQueue.PushBack(Element(item{
 		8,
 		8,
 	}))
-	spew.Dump(linkedQueue.Peek())
-	spew.Dump(linkedQueue.PeekBottom())
-	linkedQueue.Push(Element(item{
+	spew.Dump(linkedQueue.PeekFront())
+	spew.Dump(linkedQueue.PeekBack())
+	linkedQueue.PushBack(Element(item{
 		9,
 		9,
 	}))
-	spew.Dump(linkedQueue.Peek())
-	spew.Dump(linkedQueue.PeekBottom())
-	linkedQueue.PollBottom()
-	spew.Dump(linkedQueue.Peek())
-	spew.Dump(linkedQueue.PeekBottom())
-	linkedQueue.PollBottom()
-	spew.Dump(linkedQueue.Peek())
-	spew.Dump(linkedQueue.PeekBottom())
+	spew.Dump(linkedQueue.PeekFront())
+	spew.Dump(linkedQueue.PeekBack())
+	linkedQueue.PollBack()
+	spew.Dump(linkedQueue.PeekFront())
+	spew.Dump(linkedQueue.PeekBack())
+	linkedQueue.PollBack()
+	spew.Dump(linkedQueue.PeekFront())
+	spew.Dump(linkedQueue.PeekBack())
 
-
-	//linkedQueue.Push(Element("1"))
-	//linkedQueue.Push(Element("2"))
-	//linkedQueue.Push(Element("3"))
-	//spew.Dump(linkedQueue.Peek())
-	//element := linkedQueue.Poll()
-	//spew.Dump(element)
-	//spew.Dump(linkedQueue.Size())
-	//spew.Dump(linkedQueue.IsEmpty())
-	//linkedQueue.Push(Element("5"))
-	//
-	//spew.Dump(linkedQueue.Peek())
 	linkedQueue.Clear()
 
-	spew.Dump(linkedQueue.Peek())
+	spew.Dump(linkedQueue.PeekFront())
+}
+
+func TestDel(t *testing.T) {
+	queue := NewLinkedQueue()
+	queue.PushFront("1")
+	queue.Remove("1")
+
+	queue.PushBack("2")
+	queue.Remove("2")
+
+	queue.PushFront("3")
+	queue.PollFront()
+	queue.Remove("3")
+
+	queue.PushFront("1")
+	queue.PushBack("2")
+	queue.PushFront("3")
+	queue.PollFront()
+	queue.PollBack()
+	//queue.Remove("1")
+	queue.Remove("3")
+	queue.Remove("2")
+
+	queue.Clear()
 }
