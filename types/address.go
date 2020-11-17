@@ -104,6 +104,10 @@ func (a Address) Hex() string {
 func (a Address) String() string {
 	return a.Hex()
 }
+// String implements fmt.Stringer.
+func (a Address) TerminalString() string {
+	return a.Hex()
+}
 
 // Format implements fmt.Formatter, forcing the byte slice to be formatted as is,
 // without going through the stringer interface used for logging.
