@@ -17,16 +17,18 @@
 package rpc
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	log "github.com/chain5j/log15"
+	"io/ioutil"
 	"net"
-
 )
 
 // StartHTTPEndpoint starts the HTTP RPC endpoint, configured with cors/vhosts/modules
-func StartHTTPEndpoint(endpoint string, apis []API, modules []string, cors []string, vhosts []string, timeouts HTTPTimeouts) (net.Listener, *Server, error) {
+func StartHTTPEndpoint(httpConfig HttpConfig, tlsConfig TlsConfig, apis []API) (net.Listener, *Server, error) {
 	// Generate the whitelist based on the allowed modules
 	whitelist := make(map[string]bool)
-	for _, module := range modules {
+	for _, module := range httpConfig.Modules {
 		whitelist[module] = true
 	}
 	// Register all the APIs exposed by the services
@@ -44,25 +46,99 @@ func StartHTTPEndpoint(endpoint string, apis []API, modules []string, cors []str
 		listener net.Listener
 		err      error
 	)
+
+	endpoint := httpConfig.Endpoint()
 	if listener, err = net.Listen("tcp", endpoint); err != nil {
 		return nil, nil, err
 	}
-	go NewHTTPServer(cors, vhosts, timeouts, handler).Serve(listener)
+
+	httpServer := NewHTTPServer(httpConfig.Cors, httpConfig.VirtualHosts, httpConfig.Timeouts, handler)
+
+	if tlsConfig.Mod == Disable {
+		go httpServer.Serve(listener)
+	} else {
+		tlsConf, err := getTls(true, tlsConfig)
+		if err != nil {
+			return nil, nil, err
+		}
+		httpServer.TLSConfig = tlsConf
+		go httpServer.ServeTLS(listener, tlsConfig.CrtFile, tlsConfig.PrvkeyFile)
+	}
+
 	return listener, handler, err
 }
 
+func getTls(isServer bool, tlsConfig TlsConfig) (*tls.Config, error) {
+	switch tlsConfig.Mod {
+	case OneWay:
+		if isServer {
+			// 添加证书
+			cert, err := tls.LoadX509KeyPair(tlsConfig.CrtFile, tlsConfig.PrvkeyFile)
+			if err != nil {
+				log.Error("tls.LoadX509KeyPair err", "err", err)
+				return nil, err
+			}
+			return &tls.Config{
+				Certificates: []tls.Certificate{cert},
+			}, err
+		} else {
+			conf := &tls.Config{
+				InsecureSkipVerify: true, // 用来控制客户端是否证书和服务器主机名。如果设置为true,则不会校验证书以及证书中的主机名和服务器主机名是否一致。
+			}
+			return conf, nil
+		}
+	case TwoWay:
+		cert, err := tls.LoadX509KeyPair(tlsConfig.CrtFile, tlsConfig.PrvkeyFile)
+		if err != nil {
+			log.Error("tls.LoadX509KeyPair err", "err", err)
+			return nil, err
+		}
+
+		// CA证书池
+		certPool := x509.NewCertPool()
+		for _, root := range tlsConfig.CaRoots {
+			certBytes, err := ioutil.ReadFile(root)
+			if err != nil {
+				log.Error("unable to read ca.pem", "err", err)
+				return nil, err
+			}
+			ok := certPool.AppendCertsFromPEM(certBytes)
+			if !ok {
+				log.Error("failed to parse root certificate", "err", err)
+				return nil, err
+			}
+		}
+		if isServer {
+			return &tls.Config{
+				Certificates: []tls.Certificate{cert},
+				ClientAuth:   tls.RequireAndVerifyClientCert,
+				ClientCAs:    certPool,
+				MinVersion:   tls.VersionTLS12,
+			}, nil
+		} else {
+			return &tls.Config{
+				InsecureSkipVerify: true, // 用来控制客户端是否证书和服务器主机名。如果设置为true,则不会校验证书以及证书中的主机名和服务器主机名是否一致。
+				Certificates:       []tls.Certificate{cert},
+				ClientCAs:          certPool,
+			}, nil
+		}
+	case Disable:
+	}
+	return nil, nil
+}
+
 // StartWSEndpoint starts a websocket endpoint
-func StartWSEndpoint(endpoint string, apis []API, modules []string, wsOrigins []string, exposeAll bool) (net.Listener, *Server, error) {
+func StartWSEndpoint(wsConfig WSConfig, tlsConfig TlsConfig, apis []API, ) (net.Listener, *Server, error) {
 
 	// Generate the whitelist based on the allowed modules
 	whitelist := make(map[string]bool)
-	for _, module := range modules {
+	for _, module := range wsConfig.Modules {
 		whitelist[module] = true
 	}
 	// Register all the APIs exposed by the services
 	handler := NewServer()
 	for _, api := range apis {
-		if exposeAll || whitelist[api.Namespace] || (len(whitelist) == 0 && api.Public) {
+		if wsConfig.ExposeAll || whitelist[api.Namespace] || (len(whitelist) == 0 && api.Public) {
 			if err := handler.RegisterName(api.Namespace, api.Service); err != nil {
 				return nil, nil, err
 			}
@@ -74,10 +150,22 @@ func StartWSEndpoint(endpoint string, apis []API, modules []string, wsOrigins []
 		listener net.Listener
 		err      error
 	)
-	if listener, err = net.Listen("tcp", endpoint); err != nil {
+	if listener, err = net.Listen("tcp", wsConfig.Endpoint()); err != nil {
 		return nil, nil, err
 	}
-	go NewWSServer(wsOrigins, handler).Serve(listener)
+
+	wsServer := NewWSServer(wsConfig.Origins, handler)
+
+	if tlsConfig.Mod == Disable {
+		go wsServer.Serve(listener)
+	} else {
+		tlsConf, err := getTls(true, tlsConfig)
+		if err != nil {
+			return nil, nil, err
+		}
+		wsServer.TLSConfig = tlsConf
+		go wsServer.ServeTLS(listener, tlsConfig.CrtFile, tlsConfig.PrvkeyFile)
+	}
 	return listener, handler, err
 
 }

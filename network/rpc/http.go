@@ -76,19 +76,19 @@ type HTTPTimeouts struct {
 	// decisions on each request body's acceptable deadline or
 	// upload rate, most users will prefer to use
 	// ReadHeaderTimeout. It is valid to use them both.
-	ReadTimeout time.Duration
+	ReadTimeout time.Duration `json:"read_timeout" mapstructure:"read_timeout"`
 
 	// WriteTimeout is the maximum duration before timing out
 	// writes of the response. It is reset whenever a new
 	// request's header is read. Like ReadTimeout, it does not
 	// let Handlers make decisions on a per-request basis.
-	WriteTimeout time.Duration
+	WriteTimeout time.Duration `json:"write_timeout" mapstructure:"write_timeout"`
 
 	// IdleTimeout is the maximum amount of time to wait for the
 	// next request when keep-alives are enabled. If IdleTimeout
 	// is zero, the value of ReadTimeout is used. If both are
 	// zero, ReadHeaderTimeout is used.
-	IdleTimeout time.Duration
+	IdleTimeout time.Duration `json:"idle_timeout" mapstructure:"idle_timeout"`
 }
 
 // DefaultHTTPTimeouts represents the default timeout values used if further
@@ -97,6 +97,19 @@ var DefaultHTTPTimeouts = HTTPTimeouts{
 	ReadTimeout:  30 * time.Second,
 	WriteTimeout: 30 * time.Second,
 	IdleTimeout:  120 * time.Second,
+}
+
+type ClientTimeouts struct {
+	MaxIdleConns        int           // 控制最大空闲数
+	MaxIdleConnsPerHost int           // 如果不为零，则控制最大的空闲（保持活动状态）连接以保留每个主机
+	IdleConnTimeout     time.Duration // 空闲的最长时间
+	KeepAlive           time.Duration
+}
+
+var DefaultClientTimeouts = ClientTimeouts{
+	MaxIdleConns:        20,
+	MaxIdleConnsPerHost: 100,
+	IdleConnTimeout:     120 * time.Second,
 }
 
 // DialHTTPWithClient creates a new RPC client that connects to an RPC server over HTTP
@@ -111,13 +124,50 @@ func DialHTTPWithClient(endpoint string, client *http.Client) (*Client, error) {
 
 	initctx := context.Background()
 	return newClient(initctx, func(context.Context) (net.Conn, error) {
-		return &httpConn{client: client, req: req, closed: make(chan struct{})}, nil
+		return &httpConn{
+			client: client,
+			req:    req,
+			closed: make(chan struct{}),
+		}, nil
 	})
 }
 
 // DialHTTP creates a new RPC client that connects to an RPC server over HTTP.
-func DialHTTP(endpoint string) (*Client, error) {
-	return DialHTTPWithClient(endpoint, new(http.Client))
+func DialHTTP(endpoint string, timeouts ClientTimeouts, tlsConfig TlsConfig) (*Client, error) {
+	if timeouts.MaxIdleConns < 0 {
+		timeouts.MaxIdleConns = DefaultClientTimeouts.MaxIdleConns
+	}
+	if timeouts.MaxIdleConnsPerHost < 0 {
+		timeouts.MaxIdleConnsPerHost = DefaultClientTimeouts.MaxIdleConnsPerHost
+	}
+	if timeouts.IdleConnTimeout < time.Second {
+		timeouts.IdleConnTimeout = DefaultClientTimeouts.IdleConnTimeout
+	}
+
+	if tlsConfig.Mod == Disable {
+		return DialHTTPWithClient(endpoint, new(http.Client))
+	} else {
+		tlsConf, err := getTls(false, tlsConfig)
+		if err != nil {
+			return nil, err
+		}
+		tr := &http.Transport{
+			TLSClientConfig: tlsConf,
+			DialContext: (&net.Dialer{
+				Timeout:   1 * time.Second,
+				KeepAlive: timeouts.KeepAlive, // 【main】
+			}).DialContext,
+			MaxIdleConns:        timeouts.MaxIdleConns,
+			MaxIdleConnsPerHost: timeouts.MaxIdleConnsPerHost,
+			IdleConnTimeout:     timeouts.IdleConnTimeout,
+		}
+
+		httpClient := &http.Client{
+			Transport: tr,
+			Timeout:   5 * time.Second,
+		}
+		return DialHTTPWithClient(endpoint, httpClient)
+	}
 }
 
 func (c *Client) sendHTTP(ctx context.Context, op *requestOp, msg interface{}) error {

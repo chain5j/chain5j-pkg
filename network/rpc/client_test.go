@@ -190,7 +190,6 @@ func testClientCancel(transport string, t *testing.T) {
 	wg.Wait()
 }
 
-
 func TestClientSubscribeCustomNamespace(t *testing.T) {
 	namespace := "custom"
 	server := newTestServer(namespace, new(NotificationTestService))
@@ -284,7 +283,7 @@ func TestClientReconnect(t *testing.T) {
 
 	// Start a server and corresponding client.
 	s1, l1 := startServer("127.0.0.1:0")
-	client, err := DialContext(ctx, "ws://"+l1.Addr().String())
+	client, err := DialContext(ctx, "ws://"+l1.Addr().String(), DefaultClientTimeouts, TlsConfig{Mod: Disable})
 	if err != nil {
 		t.Fatal("can't dial", err)
 	}
