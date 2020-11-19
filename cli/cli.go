@@ -75,18 +75,18 @@ func (cli *Cli) Init() error {
 // 如果配置文件没有这个flag，会用pflag的默认值
 func (cli *Cli) initFlags() error {
 	var configFile string
-	//var configEnv string
+	var configEnv string
 	// 获取当前命令行
 	rootFlags := cli.rootCmd.PersistentFlags()
 
 	// 设置数据目录
 	rootFlags.StringVar(&cli.DataDir, "datadir", ioutil.DefaultDataDir(), "Data directory for the databases and keystore")
 	// host
-	rootFlags.StringP("host", "H", "127.0.0.1:9545", "server node ip:port")
+	rootFlags.StringP("rpchost", "H", "0.0.0.0", "server node ip")
 	rootFlags.Int32P("rpcport", "p", 9545, "rpc port(default is 9545)")
 	// configFile返回的值，config:参数名，value:默认值，usage:用法说明
 	rootFlags.StringVar(&configFile, "config", "./conf/config.yaml", "config file (default is ./conf/config.yaml)")
-	//rootFlags.StringVar(&configEnv, "env", "dev", "config env(default is dev)")
+	rootFlags.StringVar(&configEnv, "env", "", "config env")
 
 	// 将完整的命令绑定到viper上
 	viper.BindPFlags(rootFlags)
@@ -96,8 +96,11 @@ func (cli *Cli) initFlags() error {
 		if configFile != "" {
 			viper.SetConfigFile(configFile)
 		} else {
-			//viper.SetConfigName("config_" + configEnv)
-			viper.SetConfigName("config")
+			if configEnv != "" {
+				viper.SetConfigName("config_" + configEnv)
+			} else {
+				viper.SetConfigName("config")
+			}
 			// 添加读取的配置文件路径
 			viper.AddConfigPath(".")
 			viper.AddConfigPath("./conf")
@@ -113,7 +116,7 @@ func (cli *Cli) initFlags() error {
 		}
 
 		cli.viper = viper.GetViper()
-		//cli.watchConfig()
+		cli.watchConfig()
 	})
 
 	return nil

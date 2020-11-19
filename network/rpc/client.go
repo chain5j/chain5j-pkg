@@ -154,21 +154,25 @@ func (op *requestOp) wait(ctx context.Context) (*jsonrpcMessage, error) {
 //
 // The client reconnects automatically if the connection is lost.
 func Dial(rawurl string) (*Client, error) {
-	return DialContext(context.Background(), rawurl)
+	return DialContext(context.Background(), rawurl, DefaultClientTimeouts, TlsConfig{Mod: Disable})
+}
+
+func DialHttps(rawurl string, timeouts ClientTimeouts, tlsConfig TlsConfig) (*Client, error) {
+	return DialContext(context.Background(), rawurl, timeouts, tlsConfig)
 }
 
 // DialContext creates a new RPC client, just like Dial.
 //
 // The context is used to cancel or time out the initial connection establishment. It does
 // not affect subsequent interactions with the client.
-func DialContext(ctx context.Context, rawurl string) (*Client, error) {
+func DialContext(ctx context.Context, rawurl string, timeouts ClientTimeouts, tlsConfig TlsConfig) (*Client, error) {
 	u, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err
 	}
 	switch u.Scheme {
 	case "http", "https":
-		return DialHTTP(rawurl)
+		return DialHTTP(rawurl, timeouts, tlsConfig)
 	case "ws", "wss":
 		return DialWebsocket(ctx, rawurl, "")
 	case "stdio":
