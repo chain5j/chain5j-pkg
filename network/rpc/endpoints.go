@@ -26,6 +26,7 @@ import (
 
 // StartHTTPEndpoint starts the HTTP RPC endpoint, configured with cors/vhosts/modules
 func StartHTTPEndpoint(httpConfig HttpConfig, tlsConfig TlsConfig, apis []API) (net.Listener, *Server, error) {
+	log := log.New("rpc_http")
 	// Generate the whitelist based on the allowed modules
 	whitelist := make(map[string]bool)
 	for _, module := range httpConfig.Modules {
@@ -53,7 +54,6 @@ func StartHTTPEndpoint(httpConfig HttpConfig, tlsConfig TlsConfig, apis []API) (
 	}
 
 	httpServer := NewHTTPServer(httpConfig.Cors, httpConfig.VirtualHosts, httpConfig.Timeouts, handler)
-
 	if tlsConfig.Mod == Disable {
 		go httpServer.Serve(listener)
 	} else {
@@ -129,7 +129,7 @@ func getTls(isServer bool, tlsConfig TlsConfig) (*tls.Config, error) {
 
 // StartWSEndpoint starts a websocket endpoint
 func StartWSEndpoint(wsConfig WSConfig, tlsConfig TlsConfig, apis []API, ) (net.Listener, *Server, error) {
-
+	log := log.New("ws")
 	// Generate the whitelist based on the allowed modules
 	whitelist := make(map[string]bool)
 	for _, module := range wsConfig.Modules {
@@ -172,6 +172,7 @@ func StartWSEndpoint(wsConfig WSConfig, tlsConfig TlsConfig, apis []API, ) (net.
 
 // StartIPCEndpoint starts an IPC endpoint.
 func StartIPCEndpoint(ipcEndpoint string, apis []API) (net.Listener, *Server, error) {
+	log := log.New("ipc")
 	// Register all the APIs exposed by the services.
 	handler := NewServer()
 	for _, api := range apis {

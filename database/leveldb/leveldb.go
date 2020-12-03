@@ -57,7 +57,7 @@ func New(file string, cache int, handles int, namespace string) (*Database, erro
 	if handles < minHandles {
 		handles = minHandles
 	}
-	logger := log.NewModule("levelDB")
+	logger := log.New("levelDB")
 	logger.Info("Allocated cache and file handles", "database", file, "cache", types.StorageSize(cache*1024*1024), "handles", handles)
 
 	// Open the db and recover any potential corruptions
