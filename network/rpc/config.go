@@ -7,9 +7,14 @@ package rpc
 import (
 	"fmt"
 	"github.com/chain5j/chain5j-pkg/util/ioutil"
+	log "github.com/chain5j/log15"
 	"path/filepath"
 	"runtime"
 	"strings"
+)
+
+var (
+	logger = log.New("rpc")
 )
 
 type HttpConfig struct {
