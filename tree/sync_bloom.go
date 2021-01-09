@@ -23,13 +23,11 @@ import (
 	"github.com/chain5j/chain5j-pkg/types"
 	"github.com/chain5j/chain5j-pkg/util/dateutil"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
-	log "github.com/chain5j/log15"
+	"github.com/steakknife/bloomfilter"
 	"math"
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"github.com/steakknife/bloomfilter"
 )
 
 // syncBloomHasher is a wrapper around a byte blob to satisfy the interface API
@@ -64,7 +62,7 @@ func NewSyncBloom(memory uint64, database database.Iteratee) *SyncBloom {
 	if err != nil {
 		panic(fmt.Sprintf("failed to create bloom: %v", err))
 	}
-	log.Info("Allocated fast sync bloom", "size", types.StorageSize(memory*1024*1024))
+	logger.Info("Allocated fast sync bloom", "size", types.StorageSize(memory*1024*1024))
 
 	// Assemble the fast sync bloom and init it from previous sessions
 	b := &SyncBloom{
@@ -109,14 +107,14 @@ func (b *SyncBloom) init(database database.Iteratee) {
 			it.Release()
 			it = database.NewIteratorWithStart(key)
 
-			log.Info("Initializing fast sync bloom", "items", b.bloom.N(), "errorrate", b.errorRate(), "elapsed", dateutil.PrettyDuration(time.Since(start)))
+			logger.Info("Initializing fast sync bloom", "items", b.bloom.N(), "errorrate", b.errorRate(), "elapsed", dateutil.PrettyDuration(time.Since(start)))
 			swap = time.Now()
 		}
 	}
 	it.Release()
 
 	// Mark the bloom filter inited and return
-	log.Info("Initialized fast sync bloom", "items", b.bloom.N(), "errorrate", b.errorRate(), "elapsed", dateutil.PrettyDuration(time.Since(start)))
+	logger.Info("Initialized fast sync bloom", "items", b.bloom.N(), "errorrate", b.errorRate(), "elapsed", dateutil.PrettyDuration(time.Since(start)))
 	atomic.StoreUint32(&b.inited, 1)
 }
 
@@ -143,7 +141,7 @@ func (b *SyncBloom) Close() error {
 		b.pend.Wait()
 
 		// Wipe the bloom, but mark it "uninited" just in case someone attempts an access
-		log.Info("Deallocated fast sync bloom", "items", b.bloom.N(), "errorrate", b.errorRate())
+		logger.Info("Deallocated fast sync bloom", "items", b.bloom.N(), "errorrate", b.errorRate())
 
 		atomic.StoreUint32(&b.inited, 0)
 		b.bloom = nil

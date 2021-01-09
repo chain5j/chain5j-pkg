@@ -24,7 +24,6 @@ import (
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"math/rand"
 	"testing"
-
 )
 
 func TestIterator(t *testing.T) {

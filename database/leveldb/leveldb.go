@@ -72,6 +72,7 @@ func New(file string, cache int, handles int, namespace string) (*Database, erro
 		db, err = leveldb.RecoverFile(file, nil)
 	}
 	if err != nil {
+		logger.Error("leveldb.OpenFile err", "err", err)
 		return nil, err
 	}
 	// Assemble the wrapper with all the registered metrics

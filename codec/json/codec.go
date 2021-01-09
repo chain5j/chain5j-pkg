@@ -14,7 +14,7 @@ var _ codec.Codec = &Codec{}
 type Codec struct {
 }
 
-func NewCodec() *Codec {
+func Newcodec.Codecor() *Codec {
 	return &Codec{}
 }
 
