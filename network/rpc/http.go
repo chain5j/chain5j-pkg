@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/chain5j/log15"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -245,7 +244,7 @@ func (t *httpReadWriteNopCloser) Close() error {
 //
 // Deprecated: Server implements http.Handler
 func NewHTTPServer(cors []string, vhosts []string, timeouts HTTPTimeouts, srv *Server) *http.Server {
-	log := log.New("http_server")
+	log := log15.New("http_server")
 	// Wrap the CORS-handler within a host-handler
 	handler := newCorsHandler(srv, cors)
 	handler = newVHostHandler(vhosts, handler)

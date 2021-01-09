@@ -20,17 +20,17 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/chain5j/chain5j-pkg/codec/rlp"
 	"github.com/chain5j/chain5j-pkg/crypto/keccak"
 	"github.com/chain5j/chain5j-pkg/database/memorydb"
 	"github.com/chain5j/chain5j-pkg/types"
+	"github.com/davecgh/go-spew/spew"
 	"io/ioutil"
 	"math/big"
 	"math/rand"
 	"reflect"
 	"testing"
 	"testing/quick"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 func init() {

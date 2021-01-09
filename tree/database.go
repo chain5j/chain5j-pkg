@@ -24,7 +24,6 @@ import (
 	"github.com/chain5j/chain5j-pkg/database"
 	"github.com/chain5j/chain5j-pkg/types"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
-	log "github.com/chain5j/log15"
 	"io"
 	"reflect"
 	"sync"
@@ -266,6 +265,7 @@ func NewDatabaseWithCache(diskdb database.KeyValueStore, cache int) *Database {
 	if cache > 0 {
 		cleans = fastcache.New(cache * 1024 * 1024)
 	}
+
 	return &Database{
 		diskdb: diskdb,
 		cleans: cleans,
@@ -470,7 +470,7 @@ func (db *Database) reference(child types.Hash, parent types.Hash) {
 func (db *Database) Dereference(root types.Hash) {
 	// Sanity check to ensure that the meta-root is not removed
 	if root == (types.Hash{}) {
-		log.Error("Attempted to dereference the trie cache meta root")
+		logger.Error("Attempted to dereference the trie cache meta root")
 		return
 	}
 	db.lock.Lock()
@@ -483,7 +483,7 @@ func (db *Database) Dereference(root types.Hash) {
 	db.gcsize += storage - db.dirtiesSize
 	db.gctime += time.Since(start)
 
-	log.Debug("Dereferenced trie from memory database", "nodes", nodes-len(db.dirties), "size", storage-db.dirtiesSize, "time", time.Since(start),
+	logger.Debug("Dereferenced trie from memory database", "nodes", nodes-len(db.dirties), "size", storage-db.dirtiesSize, "time", time.Since(start),
 		"gcnodes", db.gcnodes, "gcsize", db.gcsize, "gctime", db.gctime, "livenodes", len(db.dirties), "livesize", db.dirtiesSize)
 }
 
@@ -562,7 +562,7 @@ func (db *Database) Cap(limit types.StorageSize) error {
 	if flushPreimages {
 		for hash, preimage := range db.preimages {
 			if err := batch.Put(db.secureKey(hash[:]), preimage); err != nil {
-				log.Error("Failed to commit preimage from trie database", "err", err)
+				logger.Error("Failed to commit preimage from trie database", "err", err)
 				return err
 			}
 			if batch.ValueSize() > database.IdealBatchSize {
@@ -584,7 +584,7 @@ func (db *Database) Cap(limit types.StorageSize) error {
 		// If we exceeded the ideal batch size, commit and reset
 		if batch.ValueSize() >= database.IdealBatchSize {
 			if err := batch.Write(); err != nil {
-				log.Error("Failed to write flush list to disk", "err", err)
+				logger.Error("Failed to write flush list to disk", "err", err)
 				return err
 			}
 			batch.Reset()
@@ -600,7 +600,7 @@ func (db *Database) Cap(limit types.StorageSize) error {
 	}
 	// Flush out any remainder data from the last batch
 	if err := batch.Write(); err != nil {
-		log.Error("Failed to write flush list to disk", "err", err)
+		logger.Error("Failed to write flush list to disk", "err", err)
 		return err
 	}
 	// Write successful, clear out the flushed data
@@ -628,7 +628,7 @@ func (db *Database) Cap(limit types.StorageSize) error {
 	db.flushsize += storage - db.dirtiesSize
 	db.flushtime += time.Since(start)
 
-	log.Debug("Persisted nodes from memory database", "nodes", nodes-len(db.dirties), "size", storage-db.dirtiesSize, "time", time.Since(start),
+	logger.Debug("Persisted nodes from memory database", "nodes", nodes-len(db.dirties), "size", storage-db.dirtiesSize, "time", time.Since(start),
 		"flushnodes", db.flushnodes, "flushsize", db.flushsize, "flushtime", db.flushtime, "livenodes", len(db.dirties), "livesize", db.dirtiesSize)
 
 	return nil
@@ -651,7 +651,7 @@ func (db *Database) Commit(node types.Hash, report bool) error {
 	// Move all of the accumulated preimages into a write batch
 	for hash, preimage := range db.preimages {
 		if err := batch.Put(db.secureKey(hash[:]), preimage); err != nil {
-			log.Error("Failed to commit preimage from trie database", "err", err)
+			logger.Error("Failed to commit preimage from trie database", "err", err)
 			return err
 		}
 		// If the batch is too large, flush to disk
@@ -674,12 +674,12 @@ func (db *Database) Commit(node types.Hash, report bool) error {
 
 	uncacher := &cleaner{db}
 	if err := db.commit(node, batch, uncacher); err != nil {
-		log.Error("Failed to commit trie from trie database", "err", err)
+		logger.Error("Failed to commit trie from trie database", "err", err)
 		return err
 	}
 	// Trie mostly committed to disk, flush any batch leftovers
 	if err := batch.Write(); err != nil {
-		log.Error("Failed to write trie to disk", "err", err)
+		logger.Error("Failed to write trie to disk", "err", err)
 		return err
 	}
 	// Uncache any leftovers in the last batch
@@ -693,11 +693,11 @@ func (db *Database) Commit(node types.Hash, report bool) error {
 	db.preimages = make(map[types.Hash][]byte)
 	db.preimagesSize = 0
 
-	logger := log.Info
+	logger1 := logger.Info
 	if !report {
-		logger = log.Debug
+		logger1 = logger.Debug
 	}
-	logger("Persisted trie from memory database", "nodes", nodes-len(db.dirties)+int(db.flushnodes), "size", storage-db.dirtiesSize+db.flushsize, "time", time.Since(start)+db.flushtime,
+	logger1("Persisted trie from memory database", "nodes", nodes-len(db.dirties)+int(db.flushnodes), "size", storage-db.dirtiesSize+db.flushsize, "time", time.Since(start)+db.flushtime,
 		"gcnodes", db.gcnodes, "gcsize", db.gcsize, "gctime", db.gctime, "livenodes", len(db.dirties), "livesize", db.dirtiesSize)
 
 	// Reset the garbage collection statistics

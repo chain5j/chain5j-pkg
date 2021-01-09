@@ -25,7 +25,6 @@ import (
 	"runtime"
 	"sync"
 	"testing"
-
 )
 
 func newEmptySecure() *SecureTrie {

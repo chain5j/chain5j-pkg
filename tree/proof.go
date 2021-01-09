@@ -22,7 +22,6 @@ import (
 	"github.com/chain5j/chain5j-pkg/codec/rlp"
 	"github.com/chain5j/chain5j-pkg/database"
 	"github.com/chain5j/chain5j-pkg/types"
-	log "github.com/chain5j/log15"
 )
 
 // Prove constructs a merkle proof for key. The result contains all encoded nodes
@@ -56,7 +55,7 @@ func (t *Trie) Prove(key []byte, fromLevel uint, proofDb database.KeyValueWriter
 			var err error
 			tn, err = t.resolveHash(n, nil)
 			if err != nil {
-				log.Error(fmt.Sprintf("Unhandled trie error: %v", err))
+				logger.Error(fmt.Sprintf("Unhandled trie error: %v", err))
 				return err
 			}
 		default:

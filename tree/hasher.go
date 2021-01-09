@@ -20,10 +20,9 @@ import (
 	"github.com/chain5j/chain5j-pkg/codec/rlp"
 	"github.com/chain5j/chain5j-pkg/types"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
+	"golang.org/x/crypto/sha3"
 	"hash"
 	"sync"
-
-	"golang.org/x/crypto/sha3"
 )
 
 type hasher struct {

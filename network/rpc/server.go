@@ -19,7 +19,6 @@ package rpc
 import (
 	"context"
 	"fmt"
-	log "github.com/chain5j/log15"
 	"reflect"
 	"runtime"
 	"strings"
@@ -135,7 +134,7 @@ func (s *Server) serveRequest(ctx context.Context, codec ServerCodec, singleShot
 			const size = 64 << 10
 			buf := make([]byte, size)
 			buf = buf[:runtime.Stack(buf, false)]
-			log.Error(string(buf))
+			log15.Error(string(buf))
 		}
 		s.codecsMu.Lock()
 		s.codecs.Remove(codec)
@@ -166,7 +165,7 @@ func (s *Server) serveRequest(ctx context.Context, codec ServerCodec, singleShot
 		if err != nil {
 			// If a parsing error occurred, send an error
 			if err.Error() != "EOF" {
-				log.Debug(fmt.Sprintf("read error %v\n", err))
+				log15.Debug(fmt.Sprintf("read error %v\n", err))
 				codec.Write(codec.CreateErrorResponse(nil, err))
 			}
 			// Error or end of stream, wait for requests and tear down
@@ -232,7 +231,7 @@ func (s *Server) ServeSingleRequest(ctx context.Context, codec ServerCodec, opti
 // close all codecs which will cancel pending requests/subscriptions.
 func (s *Server) Stop() {
 	if atomic.CompareAndSwapInt32(&s.run, 1, 0) {
-		log.Debug("RPC Server shutdown initiatied")
+		log15.Debug("RPC Server shutdown initiatied")
 		s.codecsMu.Lock()
 		defer s.codecsMu.Unlock()
 		s.codecs.Each(func(c interface{}) bool {
@@ -334,9 +333,9 @@ func (s *Server) exec(ctx context.Context, codec ServerCodec, req *serverRequest
 	} else {
 		response, callback = s.handle(ctx, codec, req)
 	}
-	log.Debug("response", "response", response)
+	log15.Debug("response", "response", response)
 	if err := codec.Write(response); err != nil {
-		log.Error(fmt.Sprintf("%v\n", err))
+		log15.Error(fmt.Sprintf("%v\n", err))
 		codec.Close()
 	}
 
@@ -361,9 +360,9 @@ func (s *Server) execBatch(ctx context.Context, codec ServerCodec, requests []*s
 			}
 		}
 	}
-	log.Debug("execBatch", "responses", responses)
+	log15.Debug("execBatch", "responses", responses)
 	if err := codec.Write(responses); err != nil {
-		log.Error(fmt.Sprintf("%v\n", err))
+		log15.Error(fmt.Sprintf("%v\n", err))
 		codec.Close()
 	}
 
