@@ -65,6 +65,7 @@ func (addr DomainAddress) IsEmpty() bool {
 	}
 	return false
 }
+
 func (addr DomainAddress) Bytes() []byte {
 	if addr == EmptyDomainAddress {
 		return nil
@@ -75,17 +76,17 @@ func (addr DomainAddress) Bytes() []byte {
 	return []byte(addr.Domain)
 }
 
-func (a DomainAddress) Big() *big.Int {
-	return new(big.Int).SetBytes(a.Bytes())
+func (addr DomainAddress) Big() *big.Int {
+	return new(big.Int).SetBytes(addr.Bytes())
 }
 
-func (a *DomainAddress) UnmarshalJSON(data []byte) error {
+func (addr *DomainAddress) UnmarshalJSON(data []byte) error {
 	type erased DomainAddress
 	e := erased{}
 	err := json.Unmarshal(data, &e)
 	if err == nil {
-		a.Addr = e.Addr
-		a.Domain = e.Domain
+		addr.Addr = e.Addr
+		addr.Domain = e.Domain
 		return nil
 	}
 	var input string
@@ -95,35 +96,41 @@ func (a *DomainAddress) UnmarshalJSON(data []byte) error {
 	}
 	if strings.HasPrefix(input, "0x") && len(input) == 42 {
 		addr := HexToDomainAddress(input)
-		a.Addr = addr.Addr
-		a.Domain = addr.Domain
+		addr.Addr = addr.Addr
+		addr.Domain = addr.Domain
 		return nil
 	} else if !strings.HasPrefix(input, "0x") && len(input) == 40 {
 		addr := HexToDomainAddress(input)
-		a.Addr = addr.Addr
-		a.Domain = addr.Domain
+		addr.Addr = addr.Addr
+		addr.Domain = addr.Domain
 		return nil
 	} else {
 		addr := DomainToDomainAddress(input)
-		a.Addr = addr.Addr
-		a.Domain = addr.Domain
+		addr.Addr = addr.Addr
+		addr.Domain = addr.Domain
 		return nil
 	}
 }
 
-func (a DomainAddress) String() string {
-	return a.Domain
+func (addr DomainAddress) String() string {
+	if addr.Domain != "" {
+		return addr.Domain
+	}
+	if addr.Addr != emptyAddress {
+		return addr.Addr.Hex()
+	}
+	return ""
 }
 
-func (a DomainAddress) Value() (driver.Value, error) {
-	return a.Bytes(), nil
+func (addr DomainAddress) Value() (driver.Value, error) {
+	return addr.Bytes(), nil
 }
 
-func (a *DomainAddress) EncodeRLP(w io.Writer) error {
-	return rlp.Encode(w, a.Bytes())
+func (addr *DomainAddress) EncodeRLP(w io.Writer) error {
+	return rlp.Encode(w, addr.Bytes())
 }
 
-func (a *DomainAddress) DecodeRLP(s *rlp.Stream) error {
+func (addr *DomainAddress) DecodeRLP(s *rlp.Stream) error {
 	var bytes []byte
 	err := s.Decode(&bytes)
 	if err != nil {
@@ -131,6 +138,6 @@ func (a *DomainAddress) DecodeRLP(s *rlp.Stream) error {
 		return err
 	}
 	domainAddress := BytesToDomainAddress(bytes)
-	a = &domainAddress
+	addr = &domainAddress
 	return nil
 }

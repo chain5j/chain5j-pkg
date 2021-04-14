@@ -60,6 +60,17 @@ func BigToAddress(b *big.Int) Address { return BytesToAddress(b.Bytes()) }
 // If s is larger than len(h), s will be cropped from the left.
 func HexToAddress(s string) Address { return BytesToAddress(hexutil.FromHex(s)) }
 
+func DomainToAddress(s string) Address {
+	if strings.Contains(s, "@") {
+		split := strings.Split(s, "@")
+		if hexutil.IsHex(split[0]) {
+			return BytesToAddress(hexutil.FromHex(split[0]))
+		}
+		return StringToAddress(split[0])
+	}
+	return BytesToAddress(hexutil.FromHex(s))
+}
+
 // IsHexAddress verifies whether a string can represent a valid hex-encoded
 // SuperChain address or not.
 func IsHexAddress(s string) bool {
@@ -104,6 +115,7 @@ func (a Address) Hex() string {
 func (a Address) String() string {
 	return a.Hex()
 }
+
 // String implements fmt.Stringer.
 func (a Address) TerminalString() string {
 	return a.Hex()

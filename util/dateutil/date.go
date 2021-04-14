@@ -1,7 +1,9 @@
 package dateutil
 
 import (
+	"fmt"
 	log "github.com/chain5j/log15"
+	"strings"
 	"time"
 )
 
@@ -115,4 +117,57 @@ func LoadLocation(loc string) *time.Location {
 		return location
 	}
 	return location
+}
+
+// GetDistanceTime 获取间隔时间错，传入的是毫秒
+func GetDistanceTime(diffMS int64) string {
+	isNegative := false
+	if diffMS < 0 {
+		isNegative = true
+		diffMS = -diffMS
+	}
+	s := diffMS / 1000 // 秒
+	m := s / 60        //分钟
+	h := m / 60        //小时
+	day := h / 24      //天
+	hour := h - 24*day
+	min := m - h*60
+	sec := s - m*60
+	ms := diffMS - s*1000
+	var buff strings.Builder
+	if isNegative {
+		buff.WriteString("-")
+	}
+	if day > 0 {
+		buff.WriteString(fmt.Sprintf("%dd", day))
+	}
+	if hour > 0 {
+		buff.WriteString(fmt.Sprintf("%dh", hour))
+	}
+	if min > 0 {
+		buff.WriteString(fmt.Sprintf("%dm", min))
+	}
+	if sec > 0 {
+		buff.WriteString(fmt.Sprintf("%ds", sec))
+	}
+	if ms > 0 {
+		buff.WriteString(fmt.Sprintf("%dms", ms))
+	}
+	return buff.String()
+}
+
+// GetDistanceTimeToCurrent 传入的是毫秒值
+func GetDistanceTimeToCurrent(startTime int64) string {
+	diff := CurrentTime() - startTime
+	return GetDistanceTime(diff)
+}
+
+// GetAddDayTime 添加天数
+// 如果day是负数,那么是往前算
+func GetAddDayTime(day int) (days int64) {
+	//获取两天前的时间
+	currentTime := time.Now()
+	oldTime := currentTime.AddDate(0, 0, day)
+	startTime := time.Date(oldTime.Year(), oldTime.Month(), oldTime.Day(), 0, 0, 0, 0, oldTime.Location())
+	return startTime.UnixNano()
 }
