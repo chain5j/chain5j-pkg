@@ -67,6 +67,10 @@ func (i *HexOrDecimal256) MarshalText() ([]byte, error) {
 	return []byte(fmt.Sprintf("%#x", (*big.Int)(i))), nil
 }
 
+func (i *HexOrDecimal256) Value() *big.Int {
+	return (*big.Int)(i)
+}
+
 // ParseBig256 parses s as a 256 bit integer in decimal or hexadecimal syntax.
 // Leading zeros are accepted. The empty string parses as zero.
 func ParseBig256(s string) (*big.Int, bool) {

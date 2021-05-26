@@ -23,7 +23,8 @@ func RecoverPubkey(hash, sig []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	bytes := (*btcec.PublicKey)(pub).SerializeUncompressed()
+	p := (*btcec.PublicKey)(pub)
+	bytes := p.SerializeUncompressed()
 	return bytes, err
 }
 
@@ -35,7 +36,7 @@ func SigToPub(hash, sig []byte) (*ecdsa.PublicKey, error) {
 	copy(btcsig[1:], sig)
 
 	pub, _, err := btcec.RecoverCompact(btcec.S256(), btcsig, hash)
-	return (*ecdsa.PublicKey)(pub), err
+	return pub.ToECDSA(), err
 }
 
 // Sign calculates an ECDSA signature.
