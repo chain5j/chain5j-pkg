@@ -91,7 +91,7 @@ func MarshalPubkey(pub *ecdsa.PublicKey) []byte {
 	if pub == nil || pub.X == nil || pub.Y == nil {
 		return nil
 	}
-	name := CurveName(pub.Params())
+	name := CurveName(pub.Curve)
 	switch name {
 	case P256:
 		return elliptic.Marshal(CurveType(name), pub.X, pub.Y)

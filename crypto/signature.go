@@ -9,6 +9,7 @@ import (
 	"github.com/chain5j/chain5j-pkg/crypto/gmsm"
 	"github.com/chain5j/chain5j-pkg/crypto/prime256v1"
 	"github.com/chain5j/chain5j-pkg/crypto/secp256k1"
+	"github.com/chain5j/chain5j-pkg/json"
 	"math/big"
 )
 
@@ -16,6 +17,41 @@ type SignResult struct {
 	Name      string `json:"name"`
 	PubKey    []byte `json:"pubKey"`
 	Signature []byte `json:"signature"`
+}
+
+type jsonSignResult struct {
+	Name      string `json:"name"`
+	PubKey    []byte `json:"pubKey"`
+	Signature []byte `json:"signature"`
+}
+
+func (s *SignResult) Bytes() ([]byte, error) {
+	return rlp.EncodeToBytes(&s)
+}
+
+func ParseSign(sig []byte) (*SignResult, error) {
+	var result SignResult
+	err := rlp.DecodeBytes(sig, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, err
+}
+
+func (s *SignResult) MarshalJSON() ([]byte, error) {
+	return json.Marshal(*s)
+}
+
+func (s *SignResult) UnmarshalJSON(bytes []byte) error {
+	var result jsonSignResult
+	err := json.Unmarshal(bytes, &result)
+	if err != nil {
+		return err
+	}
+	s.Signature = result.Signature
+	s.PubKey = result.PubKey
+	s.Name = result.Name
+	return nil
 }
 
 // Ecrecover returns the uncompressed public key that created the given signature.
@@ -44,15 +80,6 @@ func Ecrecover(hash, sig []byte) ([]byte, error) {
 	return prime256v1.RecoverPubkey(hash, result.Signature)
 }
 
-func ParseSign(sig []byte) (*SignResult, error) {
-	var result SignResult
-	err := rlp.DecodeBytes(sig, &result)
-	if err != nil {
-		return nil, err
-	}
-	return &result, err
-}
-
 // SigToPub returns the public key that created the given signature.
 func SigToPub(hash, sig []byte) (*ecdsa.PublicKey, error) {
 	s, err := Ecrecover(hash, sig)
@@ -69,7 +96,7 @@ func SigToPub(hash, sig []byte) (*ecdsa.PublicKey, error) {
 	case P256:
 		x, y = elliptic.Unmarshal(curve, s)
 	case S256:
-		return secp256k1.SigToPub(hash, sig)
+		x, y = elliptic.Unmarshal(curve, s)
 	case SM2P256:
 		pubkey, err := UnmarshalPubkey(sign.Name, sign.PubKey)
 		//pubkey, err := gmsm.DecompressPubkey(s)
@@ -94,11 +121,11 @@ func BigintToPub(curveName string, x, y *big.Int) *ecdsa.PublicKey {
 // solution is to hash any input before calculating the signature.
 //
 // The produced signature is in the [R || S || V] format where V is 0 or 1.
-func Sign(hash []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
+func Sign(hash []byte, prv *ecdsa.PrivateKey) (sig *SignResult, err error) {
 	if len(hash) != 32 {
 		return nil, fmt.Errorf("hash is required to be exactly 32 bytes (%d)", len(hash))
 	}
-	signType := CurveName(prv.Curve.Params())
+	signType := CurveName(prv.Curve)
 	result := SignResult{
 		Name: signType,
 	}
@@ -115,12 +142,14 @@ func Sign(hash []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
 		sig1, err = gmsm.Sign(hash, prv)
 		result.PubKey = gmsm.CompressPubkey(&prv.PublicKey)
 		//result.PubKey = MarshalPubkey(&prv.PublicKey)
+	default:
+		return nil, errors.New("unsupported signType")
 	}
 	if err != nil {
 		return nil, err
 	}
 	result.Signature = sig1
-	return rlp.EncodeToBytes(&result)
+	return &result, nil
 }
 
 // VerifySignature checks that the given public key created signature over hash.
@@ -129,9 +158,25 @@ func Sign(hash []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
 func VerifySignature(curveName string, pubkey, hash, signature []byte) bool {
 	switch curveName {
 	case P256:
-		return prime256v1.VerifySignature(pubkey, hash, signature)
+		if pubkey != nil && len(pubkey) > 0 {
+			return prime256v1.VerifySignature(pubkey, hash, signature[:len(signature)-1])
+		} else {
+			recoverPubkey, err := prime256v1.RecoverPubkey(hash, signature)
+			if err != nil {
+				return false
+			}
+			return prime256v1.VerifySignature(recoverPubkey, hash, signature[:len(signature)-1])
+		}
 	case S256:
-		return secp256k1.VerifySignature(pubkey, hash, signature)
+		if pubkey != nil && len(pubkey) > 0 {
+			return secp256k1.VerifySignature(pubkey, hash, signature[:len(signature)-1])
+		} else {
+			recoverPubkey, err := secp256k1.RecoverPubkey(hash, signature)
+			if err != nil {
+				return false
+			}
+			return secp256k1.VerifySignature(recoverPubkey, hash, signature[:len(signature)-1])
+		}
 	case SM2P256:
 		unmarshalPubkey, err := UnmarshalPubkey(curveName, pubkey)
 		if err != nil {
@@ -163,7 +208,7 @@ func DecompressPubkey(curveName string, pubkey []byte) (*ecdsa.PublicKey, error)
 
 // CompressPubkey encodes a public key to the 33-byte compressed format.
 func CompressPubkey(pubkey *ecdsa.PublicKey) []byte {
-	curveName := CurveName(pubkey.Params())
+	curveName := CurveName(pubkey.Curve)
 	switch curveName {
 	case P256:
 		return prime256v1.CompressPubkey(pubkey.X, pubkey.Y)
