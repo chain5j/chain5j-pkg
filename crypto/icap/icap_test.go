@@ -7,6 +7,7 @@ package icap
 import (
 	"fmt"
 	"github.com/chain5j/chain5j-pkg/types"
+	"log"
 	"strings"
 	"testing"
 )
@@ -27,4 +28,21 @@ func TestConvertAddressToICAP(t *testing.T) {
 	}
 
 	fmt.Println("address2", address.Hex())
+}
+
+func TestIban(t *testing.T) {
+	banInfo, err := ToICAP(Customer{
+		currency:  "tusi",
+		orgCode:   "0000",
+		resultLen: 60,
+		customer:  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+	})
+	if err != nil {
+		panic(err)
+	}
+	customer, err := ParseICAP(*banInfo)
+	if err != nil {
+		panic(err)
+	}
+	log.Println(customer)
 }

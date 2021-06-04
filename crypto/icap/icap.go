@@ -7,6 +7,7 @@ package icap
 import (
 	"errors"
 	"github.com/chain5j/chain5j-pkg/types"
+	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"log"
 	"math/big"
 	"strconv"
@@ -31,6 +32,56 @@ var (
 	Big97 = big.NewInt(97)
 	Big98 = big.NewInt(98)
 )
+
+func ToICAP(customer Customer) (*IBanInfo, error) {
+	cBytes, err := hexutil.Decode(customer.Customer())
+	if err != nil {
+		return nil, err
+	}
+	enc := base36Encode(new(big.Int).SetBytes(cBytes))
+	currencyLen := len(customer.Currency())
+	orgCodeLen := len(customer.OrgCode())
+	// 减去2位校验码
+	ibanLen := customer.ResultLen() - currencyLen - orgCodeLen - 2
+	if len(enc) < ibanLen {
+		enc = join(strings.Repeat("0", ibanLen-len(enc)), enc)
+	}
+	icap := join(customer.Currency(), checkDigits(customer.Currency(), customer.OrgCode(), enc), customer.OrgCode(), enc)
+	return NewIBanInfo(currencyLen, orgCodeLen, len(customer.customer), icap), nil
+}
+
+func ParseICAP(iban IBanInfo) (*Customer, error) {
+	if err := validCheckSumWithLen(iban.currencyLen, iban.orgCodeLen, iban.iban); err != nil {
+		return nil, err
+	}
+	// checksum is ISO13616, Ethereum address is base-36
+	l := iban.currencyLen + 2 + iban.orgCodeLen
+	bigAddr, _ := new(big.Int).SetString(iban.iban[l:], 36)
+	hex := hexutil.EncodeBig(bigAddr)
+	return &Customer{
+		currency:  iban.iban[:iban.currencyLen],
+		orgCode:   iban.iban[iban.currencyLen+2 : iban.currencyLen+2+iban.orgCodeLen],
+		resultLen: len(hex),
+		customer:  hex,
+	}, nil
+}
+
+//export ConvertAddressToICAP
+func ConvertAddressToICAP(prefix string, orgCode string, a types.Address) string {
+	prefix = strings.ToUpper(prefix)
+	enc := base36Encode(a.Big())
+	// zero padd encoded address to Direct ICAP length if needed
+	if len(enc) < 31 {
+		enc = join(strings.Repeat("0", 31-len(enc)), enc)
+	}
+	icap := join(prefix, checkDigits(prefix, orgCode, enc), orgCode, enc)
+
+	l := 31 + len(orgCode) + len(prefix) + 2
+	if len(icap) != l {
+		log.Println("生成的地址出错", "addr", a.Hex())
+	}
+	return strings.ToLower(icap)
+}
 
 //export ConvertICAPToAddress
 func ConvertICAPToAddress(prefix string, orgCodeLen int, s string) (types.Address, error) {
@@ -58,7 +109,7 @@ func parseSelfICAP(prefix string, orgCodeLen int, s string) (types.Address, erro
 		return types.Address{}, errICAPCountryCode
 	}
 	if orgCodeLen > 0 {
-		if err := validCheckSumWithOrgLen(prefix, orgCodeLen, s); err != nil {
+		if err := validCheckSumWithLen(len(prefix), orgCodeLen, s); err != nil {
 			return types.Address{}, err
 		}
 	} else {
@@ -97,23 +148,6 @@ func parseIndirectICAP(prefix string, s string) (types.Address, error) {
 	return types.Address{}, errors.New("not implemented")
 }
 
-//export ConvertAddressToICAP
-func ConvertAddressToICAP(prefix string, orgCode string, a types.Address) string {
-	prefix = strings.ToUpper(prefix)
-	enc := base36Encode(a.Big())
-	// zero padd encoded address to Direct ICAP length if needed
-	if len(enc) < 31 {
-		enc = join(strings.Repeat("0", 31-len(enc)), enc)
-	}
-	icap := join(prefix, checkDigits(prefix, orgCode, enc), orgCode, enc)
-
-	l := 31 + len(orgCode) + len(prefix) + 2
-	if len(icap) != l {
-		log.Println("生成的地址出错", "addr", a.Hex())
-	}
-	return strings.ToLower(icap)
-}
-
 // https://en.wikipedia.org/wiki/International_Bank_Account_Number#Validating_the_IBAN
 func validCheckSum(s string) error {
 	s = join(s[4:], s[:4])
@@ -128,9 +162,10 @@ func validCheckSum(s string) error {
 	return nil
 }
 
-func validCheckSumWithOrgLen(prefix string, orgLen int, s string) error {
-	l := len(prefix) + 2 + orgLen
-	s1 := join(s[l:], s[:len(prefix)], s[len(prefix)+2:l], s[len(prefix):len(prefix)+2]) // addr+prefix+check+orgcode
+func validCheckSumWithLen(prefixLen, orgCodeLen int, s string) error {
+	// s=prefix+check+orgCode+addr
+	l := prefixLen + 2
+	s1 := join(s[l:], s[:prefixLen], s[prefixLen:prefixLen+2]) // orgCode+addr+prefix+check
 	expanded, err := iso13616Expand(s1)
 	if err != nil {
 		return err
@@ -144,7 +179,7 @@ func validCheckSumWithOrgLen(prefix string, orgLen int, s string) error {
 
 func checkDigits(prefix, orgCode, s string) string {
 	prefix = strings.ToUpper(prefix)
-	expanded, _ := iso13616Expand(strings.Join([]string{s, prefix + orgCode + "00"}, ""))
+	expanded, _ := iso13616Expand(join(orgCode, s, prefix+"00")) // orgCode+addr+prefix+00
 	num, _ := new(big.Int).SetString(expanded, 10)
 	num.Sub(Big98, num.Mod(num, Big97))
 
