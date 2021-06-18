@@ -580,7 +580,7 @@ func (sig Signature) GetS() *big.Int {
 }
 
 func VerifySignature(pubkey, msg, signature []byte) bool {
-	fmt.Printf("签名长度%x,%d \n", signature, len(signature))
+	//fmt.Printf("签名长度%x,%d \n", signature, len(signature))
 	bitlen := (P256().Params().BitSize + 7) / 8
 	if len(signature) != bitlen*2 {
 		return false
@@ -602,6 +602,9 @@ func VerifySignature(pubkey, msg, signature []byte) bool {
 
 // 返回未压缩的公钥
 func RecoverPubkey(hash []byte, signature []byte) ([]byte, error) {
+	publicKey, _, err := RecoverCompact(signature, hash)
+	uncompressed := publicKey.SerializeUncompressed()
+	_=uncompressed
 	bitlen := (P256().Params().BitSize + 7) / 8
 	if len(signature) != 1+bitlen*2 {
 		return nil, errors.New("invalid compact signature size")
