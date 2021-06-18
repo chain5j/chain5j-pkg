@@ -10,6 +10,7 @@ import (
 	"github.com/chain5j/chain5j-pkg/crypto/gmsm"
 	"github.com/chain5j/chain5j-pkg/crypto/keccak"
 	"github.com/chain5j/chain5j-pkg/crypto/prime256v1"
+	"github.com/chain5j/chain5j-pkg/crypto/secp256k1"
 	"github.com/chain5j/chain5j-pkg/math"
 	"github.com/chain5j/chain5j-pkg/types"
 	"io"
@@ -166,7 +167,7 @@ func GenerateKey(curveType string) (*ecdsa.PrivateKey, error) {
 	case P256:
 		return prime256v1.GenerateEcdsaPrivateKey()
 	case S256:
-		break
+		return secp256k1.GenerateKey()
 	case SM2P256:
 		return gmsm.GenerateKey()
 	}

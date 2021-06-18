@@ -2,7 +2,6 @@ package crypto
 
 import (
 	"crypto/ecdsa"
-	"crypto/elliptic"
 	"errors"
 	"fmt"
 	"github.com/chain5j/chain5j-pkg/codec/rlp"
@@ -75,38 +74,25 @@ func Ecrecover(hash, sig []byte) ([]byte, error) {
 			return result.PubKey, nil
 		}
 		return nil, errors.New("SM2 verify is error")
+	default:
+		return nil, errors.New("unsupported signName")
 	}
-
-	return prime256v1.RecoverPubkey(hash, result.Signature)
 }
 
 // SigToPub returns the public key that created the given signature.
 func SigToPub(hash, sig []byte) (*ecdsa.PublicKey, error) {
-	s, err := Ecrecover(hash, sig)
+	sign, err := ParseSign(sig)
 	if err != nil {
 		return nil, err
 	}
-
-	sign, _ := ParseSign(sig)
-	curve := CurveType(sign.Name)
-	var (
-		x, y *big.Int
-	)
-	switch sign.Name {
-	case P256:
-		x, y = elliptic.Unmarshal(curve, s)
-	case S256:
-		x, y = elliptic.Unmarshal(curve, s)
-	case SM2P256:
-		pubkey, err := UnmarshalPubkey(sign.Name, sign.PubKey)
-		//pubkey, err := gmsm.DecompressPubkey(s)
+	if len(sign.PubKey) == 0 {
+		s, err := Ecrecover(hash, sig)
 		if err != nil {
 			return nil, err
 		}
-		x = pubkey.X
-		y = pubkey.Y
+		sign.PubKey = s
 	}
-	return &ecdsa.PublicKey{Curve: curve, X: x, Y: y}, nil
+	return UnmarshalPubkey(sign.Name, sign.PubKey)
 }
 
 func BigintToPub(curveName string, x, y *big.Int) *ecdsa.PublicKey {
@@ -141,7 +127,6 @@ func Sign(hash []byte, prv *ecdsa.PrivateKey) (sig *SignResult, err error) {
 	case SM2P256:
 		sig1, err = gmsm.Sign(hash, prv)
 		result.PubKey = gmsm.CompressPubkey(&prv.PublicKey)
-		//result.PubKey = MarshalPubkey(&prv.PublicKey)
 	default:
 		return nil, errors.New("unsupported signType")
 	}

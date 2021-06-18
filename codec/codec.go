@@ -22,3 +22,11 @@ type Encoder interface {
 type Decoder interface {
 	Decode(data []byte, structPrt interface{}) error
 }
+
+type Serializer interface {
+	Serialize() ([]byte, error)
+}
+
+type Deserializer interface {
+	Deserialize(d []byte) error
+}
