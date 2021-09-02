@@ -1,4 +1,4 @@
-// description: chain5j-pkg
+// Package hexutil
 // 
 // @author: xwc1125
 // @date: 2020/10/11

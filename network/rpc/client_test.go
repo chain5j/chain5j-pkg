@@ -19,6 +19,7 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"github.com/chain5j/chain5j-pkg/network"
 	"math/rand"
 	"net"
 	"net/http"
@@ -282,7 +283,7 @@ func TestClientReconnect(t *testing.T) {
 
 	// Start a server and corresponding client.
 	s1, l1 := startServer("127.0.0.1:0")
-	client, err := DialContext(ctx, "ws://"+l1.Addr().String(), DefaultClientTimeouts, TlsConfig{Mod: Disable})
+	client, err := DialContext(ctx, "ws://"+l1.Addr().String(), DefaultClientTimeouts, network.TlsConfig{Mod: network.Disable})
 	if err != nil {
 		t.Fatal("can't dial", err)
 	}

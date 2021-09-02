@@ -1,4 +1,4 @@
-// description: panguchain 
+// Package reflectutil
 // 
 // @author: xwc1125
 // @date: 2020/3/11

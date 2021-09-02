@@ -1,4 +1,4 @@
-// description: chain5j-core 
+// Package types
 // 
 // @author: xwc1125
 // @date: 2020/10/16
@@ -9,35 +9,20 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/crypto/sha3"
+	"github.com/chain5j/chain5j-pkg/crypto/hash/sha3"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"math/big"
 	"reflect"
 	"strings"
 )
 
-//type Address interface {
-//	Len() int       // 地址长度
-//	Bytes() []byte  // 地址对象转化为bytes数据
-//	String() string // 转成地址字符串
-//
-//	FromBytes([]byte) (Address, error)    // 将bytes转换为address【使用时，先new一个新对象，然后返回的时结果】
-//	FromStr(addr string) (Address, error) // 将bytes转换为address【使用时，先new一个新对象，然后返回的时结果】
-//
-//	Validate(addr string) bool // 判断字符串是否合法【使用时，先new一个新对象，然后返回的时结果】
-//	Nil() bool                 // 是否为空
-//	Hash() Hash                // 地址hash
-//
-//	Format(s fmt.State, c rune) // 打印格式化
-//	//encoding.TextMarshaler      // 编码为UTF-8编码的文本
-//	//encoding.TextUnmarshaler    // 解码编码
-//	//
-//	//json.Marshaler // json编码处理
-//}
-
 const AddressLength = 20
 
 var addressT = reflect.TypeOf(Address{})
+
+var (
+	EmptyAddress = Address{}
+)
 
 // Address represents the 20 byte address of an  account.
 type Address [AddressLength]byte
@@ -60,17 +45,6 @@ func BigToAddress(b *big.Int) Address { return BytesToAddress(b.Bytes()) }
 // If s is larger than len(h), s will be cropped from the left.
 func HexToAddress(s string) Address { return BytesToAddress(hexutil.FromHex(s)) }
 
-func DomainToAddress(s string) Address {
-	if strings.Contains(s, "@") {
-		split := strings.Split(s, "@")
-		if hexutil.IsHex(split[0]) {
-			return BytesToAddress(hexutil.FromHex(split[0]))
-		}
-		return StringToAddress(split[0])
-	}
-	return BytesToAddress(hexutil.FromHex(s))
-}
-
 // IsHexAddress verifies whether a string can represent a valid hex-encoded
 // SuperChain address or not.
 func IsHexAddress(s string) bool {
@@ -79,6 +53,8 @@ func IsHexAddress(s string) bool {
 	}
 	return len(s) == 2*AddressLength && hexutil.IsHex(s)
 }
+
+func (a Address) Len() int { return AddressLength }
 
 // Bytes gets the string representation of the underlying address.
 func (a Address) Bytes() []byte { return a[:] }
@@ -116,7 +92,19 @@ func (a Address) String() string {
 	return a.Hex()
 }
 
-// String implements fmt.Stringer.
+func (a Address) FromBytes(b []byte) (Addr, error) {
+	return BytesToAddress(b), nil
+}
+
+func (a Address) FromStr(addr string) (Addr, error) {
+	return HexToAddress(addr), nil
+}
+
+func (a Address) Validate(addr string) bool {
+	return true
+}
+
+// TerminalString String implements fmt.Stringer.
 func (a Address) TerminalString() string {
 	return a.Hex()
 }

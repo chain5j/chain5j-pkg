@@ -1,5 +1,5 @@
-// description: chain5j 
-// 
+// Package codec
+//
 // @author: xwc1125
 // @date: 2021/1/5
 package codec
@@ -7,21 +7,23 @@ package codec
 import "sync"
 
 var (
-	lock  sync.RWMutex
+	once  sync.Once
 	coder Codec
 )
 
+// RegisterCodec 注册编解码器
 func RegisterCodec(_codec Codec) {
-	lock.Lock()
-	defer lock.Unlock()
-	if coder == nil {
-		coder = _codec
-	}
+	once.Do(func() {
+		if coder == nil {
+			coder = _codec
+		}
+	})
 }
 
-func Codecor() Codec {
+// Coder 获取全局的编解码器
+func Coder() Codec {
 	if coder == nil {
-		RegisterCodec(DefaultCodec)
+		return DefaultCodec
 	}
 	return coder
 }

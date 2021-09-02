@@ -1,8 +1,7 @@
-// description: chain5j-pkg
-// 
+// Package parseutil
+//
 // @author: xwc1125
 // @date: 2019/10/29
-//package main
 package parseutil
 
 import (
@@ -14,7 +13,7 @@ func GetValue(param interface{}) reflect.Value {
 	return reflect.ValueOf(param)
 }
 
-//根据参数获取对应的Values
+//GetValues 根据参数获取对应的Values
 func GetValues(param ...interface{}) []reflect.Value {
 	vals := make([]reflect.Value, 0, len(param))
 	for i := range param {

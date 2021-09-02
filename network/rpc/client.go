@@ -23,7 +23,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/chain5j/log15"
+	"github.com/chain5j/chain5j-pkg/network"
 	"net"
 	"net/url"
 	"os"
@@ -154,10 +154,10 @@ func (op *requestOp) wait(ctx context.Context) (*jsonrpcMessage, error) {
 //
 // The client reconnects automatically if the connection is lost.
 func Dial(rawurl string) (*Client, error) {
-	return DialContext(context.Background(), rawurl, DefaultClientTimeouts, TlsConfig{Mod: Disable})
+	return DialContext(context.Background(), rawurl, DefaultClientTimeouts, network.TlsConfig{Mod: network.Disable})
 }
 
-func DialHttps(rawurl string, timeouts ClientTimeouts, tlsConfig TlsConfig) (*Client, error) {
+func DialHttps(rawurl string, timeouts ClientTimeouts, tlsConfig network.TlsConfig) (*Client, error) {
 	return DialContext(context.Background(), rawurl, timeouts, tlsConfig)
 }
 
@@ -165,7 +165,7 @@ func DialHttps(rawurl string, timeouts ClientTimeouts, tlsConfig TlsConfig) (*Cl
 //
 // The context is used to cancel or time out the initial connection establishment. It does
 // not affect subsequent interactions with the client.
-func DialContext(ctx context.Context, rawurl string, timeouts ClientTimeouts, tlsConfig TlsConfig) (*Client, error) {
+func DialContext(ctx context.Context, rawurl string, timeouts ClientTimeouts, tlsConfig network.TlsConfig) (*Client, error) {
 	u, err := url.Parse(rawurl)
 	if err != nil {
 		return nil, err
@@ -452,9 +452,7 @@ func (c *Client) newMessage(method string, paramsIn ...interface{}) (*jsonrpcMes
 func (c *Client) send(ctx context.Context, op *requestOp, msg interface{}) error {
 	select {
 	case c.requestOp <- op:
-		log15.Trace("rpc send", "msg", log.Lazy{Fn: func() string {
-			return fmt.Sprint("sending ", msg)
-		}})
+		log15().Trace("rpc send", "msg", fmt.Sprint("sending ", msg))
 		err := c.write(ctx, msg)
 		c.sendDone <- err
 		return err
@@ -490,7 +488,7 @@ func (c *Client) write(ctx context.Context, msg interface{}) error {
 func (c *Client) reconnect(ctx context.Context) error {
 	newconn, err := c.connectFunc(ctx)
 	if err != nil {
-		log15.Trace(fmt.Sprintf("reconnect failed: %v", err))
+		log15().Trace(fmt.Sprintf("reconnect failed: %v", err))
 		return err
 	}
 	select {
@@ -541,31 +539,25 @@ func (c *Client) dispatch(conn net.Conn) {
 			for _, msg := range batch {
 				switch {
 				case msg.isNotification():
-					log15.Trace("", "msg", log.Lazy{Fn: func() string {
-						return fmt.Sprint("<-readResp: notification ", msg)
-					}})
+					log15().Trace("", "msg", fmt.Sprint("<-readResp: notification ", msg))
 					c.handleNotification(msg)
 				case msg.isResponse():
-					log15.Trace("", "msg", log.Lazy{Fn: func() string {
-						return fmt.Sprint("<-readResp: response ", msg)
-					}})
+					log15().Trace("", "msg", fmt.Sprint("<-readResp: response ", msg))
 					c.handleResponse(msg)
 				default:
-					log15.Debug("", "msg", log.Lazy{Fn: func() string {
-						return fmt.Sprint("<-readResp: dropping weird message", msg)
-					}})
+					log15().Debug("", "msg", fmt.Sprint("<-readResp: dropping weird message", msg))
 					// TODO: maybe close
 				}
 			}
 
 		case err := <-c.readErr:
-			log15.Debug("<-readErr", "err", err)
+			log15().Debug("<-readErr", "err", err)
 			c.closeRequestOps(err)
 			conn.Close()
 			reading = false
 
 		case newconn := <-c.reconnected:
-			log15.Debug("<-reconnected", "reading", reading, "remote", conn.RemoteAddr())
+			log15().Debug("<-reconnected", "reading", reading, "remote", conn.RemoteAddr())
 			if reading {
 				// Wait for the previous read loop to exit. This is a rare case.
 				conn.Close()
@@ -622,7 +614,7 @@ func (c *Client) closeRequestOps(err error) {
 
 func (c *Client) handleNotification(msg *jsonrpcMessage) {
 	if !strings.HasSuffix(msg.Method, notificationMethodSuffix) {
-		log15.Debug("dropping non-subscription message", "msg", msg)
+		log15().Debug("dropping non-subscription message", "msg", msg)
 		return
 	}
 	var subResult struct {
@@ -630,7 +622,7 @@ func (c *Client) handleNotification(msg *jsonrpcMessage) {
 		Result json.RawMessage `json:"result"`
 	}
 	if err := json.Unmarshal(msg.Params, &subResult); err != nil {
-		log15.Debug("dropping invalid subscription message", "msg", msg)
+		log15().Debug("dropping invalid subscription message", "msg", msg)
 		return
 	}
 	if c.subs[subResult.ID] != nil {
@@ -641,7 +633,7 @@ func (c *Client) handleNotification(msg *jsonrpcMessage) {
 func (c *Client) handleResponse(msg *jsonrpcMessage) {
 	op := c.respWait[string(msg.ID)]
 	if op == nil {
-		log15.Debug("unsolicited response", "msg", msg)
+		log15().Debug("unsolicited response", "msg", msg)
 		return
 	}
 	delete(c.respWait, string(msg.ID))

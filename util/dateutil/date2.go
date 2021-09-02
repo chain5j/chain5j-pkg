@@ -1,4 +1,4 @@
-// description: sync_eth
+// Package dateutil
 //
 // @author: xwc1125
 // @date: 2020/3/31

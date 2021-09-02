@@ -1,4 +1,4 @@
-// description: xblog
+// Package reflectutil
 //
 // @author: xwc1125
 // @date: 2020/3/11
@@ -8,7 +8,7 @@ import (
 	"reflect"
 )
 
-// 将 interface{T} 转变为 interface{*T}
+// ToPointer 将 interface{T} 转变为 interface{*T}
 // 如果是指针，直接返回
 func ToPointer(w interface{}) interface{} {
 	typeOf := reflect.TypeOf(w)

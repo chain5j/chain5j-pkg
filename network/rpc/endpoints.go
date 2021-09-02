@@ -19,12 +19,13 @@ package rpc
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"github.com/chain5j/chain5j-pkg/network"
 	"io/ioutil"
 	"net"
 )
 
 // StartHTTPEndpoint starts the HTTP RPC endpoint, configured with cors/vhosts/modules
-func StartHTTPEndpoint(httpConfig HttpConfig, tlsConfig TlsConfig, apis []API) (net.Listener, *Server, error) {
+func StartHTTPEndpoint(httpConfig HttpConfig, tlsConfig network.TlsConfig, apis []API) (net.Listener, *Server, error) {
 	log := log15.New("rpc_http")
 	// Generate the whitelist based on the allowed modules
 	whitelist := make(map[string]bool)
@@ -53,7 +54,7 @@ func StartHTTPEndpoint(httpConfig HttpConfig, tlsConfig TlsConfig, apis []API) (
 	}
 
 	httpServer := NewHTTPServer(httpConfig.Cors, httpConfig.VirtualHosts, httpConfig.Timeouts, handler)
-	if tlsConfig.Mod == Disable {
+	if tlsConfig.Mod == network.Disable {
 		go httpServer.Serve(listener)
 	} else {
 		tlsConf, err := getTls(true, tlsConfig)
@@ -61,18 +62,18 @@ func StartHTTPEndpoint(httpConfig HttpConfig, tlsConfig TlsConfig, apis []API) (
 			return nil, nil, err
 		}
 		httpServer.TLSConfig = tlsConf
-		go httpServer.ServeTLS(listener, tlsConfig.CrtFile, tlsConfig.PrvkeyFile)
+		go httpServer.ServeTLS(listener, tlsConfig.CertFile, tlsConfig.KeyFile)
 	}
 
 	return listener, handler, err
 }
 
-func getTls(isServer bool, tlsConfig TlsConfig) (*tls.Config, error) {
+func getTls(isServer bool, tlsConfig network.TlsConfig) (*tls.Config, error) {
 	switch tlsConfig.Mod {
-	case OneWay:
+	case network.OneWay:
 		if isServer {
 			// 添加证书
-			cert, err := tls.LoadX509KeyPair(tlsConfig.CrtFile, tlsConfig.PrvkeyFile)
+			cert, err := tls.LoadX509KeyPair(tlsConfig.CertFile, tlsConfig.KeyFile)
 			if err != nil {
 				log15.Error("tls.LoadX509KeyPair err", "err", err)
 				return nil, err
@@ -86,8 +87,8 @@ func getTls(isServer bool, tlsConfig TlsConfig) (*tls.Config, error) {
 			}
 			return conf, nil
 		}
-	case TwoWay:
-		cert, err := tls.LoadX509KeyPair(tlsConfig.CrtFile, tlsConfig.PrvkeyFile)
+	case network.TwoWay:
+		cert, err := tls.LoadX509KeyPair(tlsConfig.CertFile, tlsConfig.KeyFile)
 		if err != nil {
 			log15.Error("tls.LoadX509KeyPair err", "err", err)
 			return nil, err
@@ -121,13 +122,13 @@ func getTls(isServer bool, tlsConfig TlsConfig) (*tls.Config, error) {
 				ClientCAs:          certPool,
 			}, nil
 		}
-	case Disable:
+	case network.Disable:
 	}
 	return nil, nil
 }
 
 // StartWSEndpoint starts a websocket endpoint
-func StartWSEndpoint(wsConfig WSConfig, tlsConfig TlsConfig, apis []API, ) (net.Listener, *Server, error) {
+func StartWSEndpoint(wsConfig WSConfig, tlsConfig network.TlsConfig, apis []API) (net.Listener, *Server, error) {
 	log := log15.New("ws")
 	// Generate the whitelist based on the allowed modules
 	whitelist := make(map[string]bool)
@@ -155,7 +156,7 @@ func StartWSEndpoint(wsConfig WSConfig, tlsConfig TlsConfig, apis []API, ) (net.
 
 	wsServer := NewWSServer(wsConfig.Origins, handler)
 
-	if tlsConfig.Mod == Disable {
+	if tlsConfig.Mod == network.Disable {
 		go wsServer.Serve(listener)
 	} else {
 		tlsConf, err := getTls(true, tlsConfig)
@@ -163,7 +164,7 @@ func StartWSEndpoint(wsConfig WSConfig, tlsConfig TlsConfig, apis []API, ) (net.
 			return nil, nil, err
 		}
 		wsServer.TLSConfig = tlsConf
-		go wsServer.ServeTLS(listener, tlsConfig.CrtFile, tlsConfig.PrvkeyFile)
+		go wsServer.ServeTLS(listener, tlsConfig.CertFile, tlsConfig.KeyFile)
 	}
 	return listener, handler, err
 

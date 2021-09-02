@@ -1,5 +1,5 @@
-// description: chain5j-pkg
-// 
+// Package ioutil
+//
 // @author: xwc1125
 // @date: 2020/10/11
 package ioutil
@@ -11,7 +11,7 @@ import (
 	"runtime"
 )
 
-// 路径是否存在
+// PathExists 路径是否存在
 func PathExists(path string) bool {
 	_, err := os.Stat(path)
 	if err == nil {
@@ -23,12 +23,12 @@ func PathExists(path string) bool {
 	return false
 }
 
-// 获取项目的路径
+// GetProjectPath 获取项目的路径
 func GetProjectPath() (dir string, err error) {
 	return os.Getwd()
 }
 
-// DefaultDataDir
+// DefaultDataDir 默认路径
 func DefaultDataDir() string {
 	// Try to place the data folder in the user's home dir
 	home := homeDir()
@@ -56,6 +56,7 @@ func homeDir() string {
 	return ""
 }
 
+// MakeDirAll 创建文件夹
 func MakeDirAll(path string) error {
 	return os.MkdirAll(path, os.ModePerm)
 }

@@ -2,7 +2,7 @@ package dateutil
 
 import (
 	"fmt"
-	log "github.com/chain5j/log15"
+	"github.com/chain5j/chain5j-pkg/logger"
 	"strings"
 	"time"
 )
@@ -112,7 +112,7 @@ func LoadLocation(loc string) *time.Location {
 	//fmt.Println(time.Date(2018,1,1,12,0,0,0, local))
 	location, e := time.LoadLocation(loc)
 	if e != nil {
-		log.Error("loadLocation err", "err", e)
+		logger.Error("loadLocation err", "err", e)
 		location, _ = time.LoadLocation("")
 		return location
 	}

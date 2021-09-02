@@ -1,4 +1,4 @@
-// description: chain5j-pkg
+// Package types
 // 
 // @author: xwc1125
 // @date: 2020/10/11
@@ -14,7 +14,7 @@ import (
 	"reflect"
 )
 
-// hash长度
+// HashLength hash长度
 const HashLength = 32
 
 var (

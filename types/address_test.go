@@ -1,4 +1,4 @@
-// description: chain5j-core 
+// Package types
 // 
 // @author: xwc1125
 // @date: 2020/10/16

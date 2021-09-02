@@ -1,3 +1,7 @@
+// Package scrypt
+//
+// @author: xwc1125
+// @date: 2020/10/25
 package scrypt
 
 import (

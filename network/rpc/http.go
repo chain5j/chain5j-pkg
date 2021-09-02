@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/chain5j/chain5j-pkg/network"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -132,7 +133,7 @@ func DialHTTPWithClient(endpoint string, client *http.Client) (*Client, error) {
 }
 
 // DialHTTP creates a new RPC client that connects to an RPC server over HTTP.
-func DialHTTP(endpoint string, timeouts ClientTimeouts, tlsConfig TlsConfig) (*Client, error) {
+func DialHTTP(endpoint string, timeouts ClientTimeouts, tlsConfig network.TlsConfig) (*Client, error) {
 	if timeouts.MaxIdleConns < 0 {
 		timeouts.MaxIdleConns = DefaultClientTimeouts.MaxIdleConns
 	}
@@ -143,7 +144,7 @@ func DialHTTP(endpoint string, timeouts ClientTimeouts, tlsConfig TlsConfig) (*C
 		timeouts.IdleConnTimeout = DefaultClientTimeouts.IdleConnTimeout
 	}
 
-	if tlsConfig.Mod == Disable {
+	if tlsConfig.Mod == network.Disable {
 		return DialHTTPWithClient(endpoint, new(http.Client))
 	} else {
 		tlsConf, err := getTls(false, tlsConfig)

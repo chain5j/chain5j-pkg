@@ -1,5 +1,5 @@
-// description: chain5j 
-// 
+// Package rpc
+//
 // @author: xwc1125
 // @date: 2020/11/18
 package rpc
@@ -26,21 +26,6 @@ func (c HttpConfig) Endpoint() string {
 		return ""
 	}
 	return fmt.Sprintf("%s:%d", c.Host, c.Port)
-}
-
-type TlsMod string
-
-var (
-	Disable TlsMod = "disable" //不启用TLS
-	OneWay  TlsMod = "oneway"  //单向认证
-	TwoWay  TlsMod = "twoway"  //双向认证
-)
-
-type TlsConfig struct {
-	Mod        TlsMod   `json:"mod" mapstructure:"mod"`                 // 模式
-	PrvkeyFile string   `json:"prvkey_file" mapstructure:"prvkey_file"` // 服务私钥
-	CrtFile    string   `json:"crt_file" mapstructure:"crt_file"`       // 服务证书
-	CaRoots    []string `json:"ca_roots" mapstructure:"ca_roots"`       // ca根证书
 }
 
 type WSConfig struct {
