@@ -1,7 +1,6 @@
 // Package icap
 //
 // @author: xwc1125
-// @date: 2021/4/14
 package icap
 
 import (
@@ -32,7 +31,7 @@ func TestConvertAddressToICAP(t *testing.T) {
 
 func TestIban(t *testing.T) {
 	banInfo, err := ToICAP(Customer{
-		currency:  "tusi",
+		currency:  "chain5j",
 		orgCode:   "0000",
 		resultLen: 60,
 		customer:  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",

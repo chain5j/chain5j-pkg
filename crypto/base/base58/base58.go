@@ -1,7 +1,6 @@
 // Package base58
 //
 // @author: xwc1125
-// @date: 2021/4/14
 package base58
 
 import (

@@ -1,13 +1,13 @@
 // Package types
-// 
+//
 // @author: xwc1125
-// @date: 2020/10/11
 package types
 
 import (
 	"database/sql/driver"
 	"encoding/hex"
 	"fmt"
+	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"math/big"
 	"math/rand"
@@ -18,8 +18,12 @@ import (
 const HashLength = 32
 
 var (
-	hashT     = reflect.TypeOf(Hash{})
-	EmptyHash = Hash{}
+	hashT         = reflect.TypeOf(Hash{})
+	EmptyHash     = Hash{}
+	EmptyCode     = sha3.Keccak256(nil)
+	EmptyCodeHash = BytesToHash(EmptyCode)
+	EmptyRootHash = HexToHash("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421")
+	//EmptyRootHash, _ = hashalg.RootHash(codec.Coder(), nil)
 )
 
 type Hash [HashLength]byte
@@ -39,7 +43,7 @@ func BigToHash(b *big.Int) Hash {
 }
 
 func HexToHash(s string) Hash {
-	return BytesToHash(hexutil.FromHex(s))
+	return BytesToHash(hexutil.MustDecode(s))
 }
 
 // Bytes gets the byte representation of the underlying hash.

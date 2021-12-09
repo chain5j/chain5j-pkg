@@ -1,12 +1,12 @@
 // Package signature
 //
 // @author: xwc1125
-// @date: 2019/9/9
 package signature
 
 import (
 	"crypto/elliptic"
-	"github.com/chain5j/chain5j-pkg/crypto/signature/secp256k1"
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/chain5j/logger"
 	"github.com/tjfoc/gmsm/sm2"
 )
 
@@ -27,15 +27,17 @@ func CurveType(curveName string) elliptic.Curve {
 	case P521:
 		return elliptic.P521()
 	case S256:
-		return secp256k1.S256()
+		return btcec.S256()
 	case SM2P256:
 		return sm2.P256Sm2()
+	default:
+		logger.Error("unsupported the curve", "curve", curveName)
 	}
 	return elliptic.P256()
 }
 
 func CurveName(curve elliptic.Curve) string {
-	if curve == secp256k1.S256() {
+	if curve == btcec.S256() {
 		return S256
 	}
 	name := curve.Params().Name

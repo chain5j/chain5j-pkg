@@ -1,7 +1,6 @@
 // Package codec
 //
 // @author: xwc1125
-// @date: 2021/1/5
 package codec
 
 import "sync"

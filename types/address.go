@@ -1,7 +1,6 @@
 // Package types
 // 
 // @author: xwc1125
-// @date: 2020/10/16
 package types
 
 import (
@@ -9,7 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/crypto/hash/sha3"
+	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"math/big"
 	"reflect"
@@ -43,7 +42,7 @@ func BigToAddress(b *big.Int) Address { return BytesToAddress(b.Bytes()) }
 
 // HexToAddress returns Address with byte values of s.
 // If s is larger than len(h), s will be cropped from the left.
-func HexToAddress(s string) Address { return BytesToAddress(hexutil.FromHex(s)) }
+func HexToAddress(s string) Address { return BytesToAddress(hexutil.MustDecode(s)) }
 
 // IsHexAddress verifies whether a string can represent a valid hex-encoded
 // SuperChain address or not.
@@ -191,7 +190,7 @@ func NewMixedcaseAddressFromString(hexaddr string) (*MixedcaseAddress, error) {
 	if !IsHexAddress(hexaddr) {
 		return nil, fmt.Errorf("Invalid address")
 	}
-	a := hexutil.FromHex(hexaddr)
+	a := hexutil.MustDecode(hexaddr)
 	return &MixedcaseAddress{addr: BytesToAddress(a), original: hexaddr}, nil
 }
 

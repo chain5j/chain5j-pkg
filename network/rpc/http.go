@@ -245,7 +245,7 @@ func (t *httpReadWriteNopCloser) Close() error {
 //
 // Deprecated: Server implements http.Handler
 func NewHTTPServer(cors []string, vhosts []string, timeouts HTTPTimeouts, srv *Server) *http.Server {
-	log := log15.New("http_server")
+	log := log15().New("http_server")
 	// Wrap the CORS-handler within a host-handler
 	handler := newCorsHandler(srv, cors)
 	handler = newVHostHandler(vhosts, handler)

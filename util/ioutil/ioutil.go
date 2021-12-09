@@ -1,7 +1,6 @@
 // Package ioutil
 //
 // @author: xwc1125
-// @date: 2020/10/11
 package ioutil
 
 import (
@@ -59,4 +58,12 @@ func homeDir() string {
 // MakeDirAll 创建文件夹
 func MakeDirAll(path string) error {
 	return os.MkdirAll(path, os.ModePerm)
+}
+
+func MakeParentDir(filePath string) error {
+	dir, err := filepath.Abs(filepath.Dir(filePath))
+	if err != nil {
+		return err
+	}
+	return MakeDirAll(dir)
 }

@@ -20,7 +20,7 @@ package tree
 import (
 	"bytes"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/crypto/hash/sha3"
+	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
 	"github.com/chain5j/chain5j-pkg/types"
 )
 
@@ -29,7 +29,7 @@ var (
 	emptyRoot = types.HexToHash("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421")
 
 	// emptyState is the known hash of an empty state trie entry.
-	emptyState = sha3.Keccak256Hash(nil)
+	emptyState = types.BytesToHash(sha3.Keccak256(nil))
 )
 
 // LeafCallback is a callback type invoked when a trie operation reaches a leaf
@@ -86,7 +86,7 @@ func (t *Trie) NodeIterator(start []byte) NodeIterator {
 func (t *Trie) Get(key []byte) []byte {
 	res, err := t.TryGet(key)
 	if err != nil {
-		logger.Error(fmt.Sprintf("Unhandled trie error: %v", err))
+		log().Error(fmt.Sprintf("Unhandled trie error: %v", err))
 	}
 	return res
 }
@@ -147,7 +147,7 @@ func (t *Trie) tryGet(origNode node, key []byte, pos int) (value []byte, newnode
 // stored in the trie.
 func (t *Trie) Update(key, value []byte) {
 	if err := t.TryUpdate(key, value); err != nil {
-		logger.Error(fmt.Sprintf("Unhandled trie error: %v", err))
+		log().Error(fmt.Sprintf("Unhandled trie error: %v", err))
 	}
 }
 
@@ -249,7 +249,7 @@ func (t *Trie) insert(n node, prefix, key []byte, value node) (bool, node, error
 // Delete removes any existing value for key from the trie.
 func (t *Trie) Delete(key []byte) {
 	if err := t.TryDelete(key); err != nil {
-		logger.Error(fmt.Sprintf("Unhandled trie error: %v", err))
+		log().Error(fmt.Sprintf("Unhandled trie error: %v", err))
 	}
 }
 

@@ -1,7 +1,6 @@
 // Package types
 // 
 // @author: xwc1125
-// @date: 2021/6/21
 package types
 
 import "fmt"

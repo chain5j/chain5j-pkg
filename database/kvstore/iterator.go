@@ -1,7 +1,6 @@
 // Package kvstore
 //
 // @author: xwc1125
-// @date: 2020/10/11
 package kvstore
 
 // Iterator iterates over a database's key/value pairs in ascending key order.

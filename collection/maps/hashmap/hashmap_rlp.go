@@ -1,136 +1,167 @@
 // Package hashmap
 //
 // @author: xwc1125
-// @date: 2020/11/15
 package hashmap
 
 import (
-	"encoding/json"
 	"github.com/chain5j/chain5j-pkg/codec/rlp"
-	"github.com/chain5j/chain5j-pkg/util/reflectutil"
-	"log"
+	"github.com/chain5j/chain5j-pkg/math"
+	"github.com/chain5j/chain5j-pkg/types"
+	"github.com/chain5j/chain5j-pkg/util/convutil"
+	"github.com/chain5j/chain5j-pkg/util/hexutil"
+	"github.com/mitchellh/mapstructure"
+	"io"
+	"math/big"
 	"reflect"
 )
 
-type KVBytes struct {
-	Key   string
-	Value []byte
-}
-
-type Encoder interface {
-	EncodeToBytes() ([]byte, error)
-}
-
-type Decoder interface {
-	DecodeFromBytes([]byte) error
-}
-
-var (
-	EncoderInterface = reflect.TypeOf(new(Encoder)).Elem()
-	DecoderInterface = reflect.TypeOf(new(Decoder)).Elem()
-)
-
-func (m *HashMap) EncodeToBytes() ([]byte, error) {
-	var data []KVBytes
-	var kv KVBytes
-	sort2 := m.Sort() // 排序
-
-	for _, v := range sort2 {
-		kv = KVBytes{
-			Key: v.Key,
-		}
-		v1 := reflectutil.ToPointer(v.Value)
-		valueOf := reflect.ValueOf(v1)
-		if valueOf.Type().Implements(EncoderInterface) {
-			bytes, err := valueOf.Interface().(Encoder).EncodeToBytes()
-			if err != nil {
-				log.Println(err)
-				return nil, err
+func (m *HashMap) EncodeRLP(w io.Writer) error {
+	data := m.Sort()
+	for i, kv := range data {
+		switch vv := kv.Value.(type) {
+		case int, int8, int16, int32, int64, float32, float64:
+			data[i] = KV{
+				Key:   kv.Key,
+				Value: convutil.ToUint64(vv),
 			}
-			kv.Value = bytes
-		} else {
-			bytes, err := json.Marshal(v.Value)
-			if err != nil {
-				log.Println(err)
-				return nil, err
-			}
-			kv.Value = bytes
 		}
-		data = append(data, kv)
 	}
-	return rlp.EncodeToBytes(data)
+	return rlp.Encode(w, data)
 }
 
-func (m *HashMap) DecodeFromBytes(b []byte) error {
-	var data []KVBytes
-	if err := rlp.DecodeBytes(b, &data); err != nil {
+func (m *HashMap) DecodeRLP(s *rlp.Stream) error {
+	var data []KV
+	if err := s.Decode(&data); err != nil {
 		return err
 	}
-	var valueOf reflect.Value
-	val := m.val
-	if m.val != nil {
-		val = reflectutil.ToPointer(m.val)
-		valueOf = reflect.ValueOf(val)
-	}
-	for _, v := range data {
-		if val != nil {
-			if valueOf.Type().Implements(DecoderInterface) {
-				val := valueOf.Interface().(Decoder)
-				err := val.DecodeFromBytes(v.Value)
-				if err != nil {
-					return err
-				}
-			} else {
-				err := json.Unmarshal(v.Value, val)
-				if err != nil {
-					return err
-				}
-			}
-			if reflect.TypeOf(m.val).Kind() != reflect.Ptr {
-				m.data[v.Key] = reflectutil.DelPointer(val)
-			} else {
-				m.data[v.Key] = val
-			}
-		} else {
-			m.data[v.Key] = v.Value
-		}
+	for _, kv := range data {
+		m.data[kv.Key] = kv.Value
 	}
 	return nil
 }
 
-func (m *HashMap) DecodeFromBytesMult(b []byte, vals []interface{}) error {
-	var data []KVBytes
-	if err := rlp.DecodeBytes(b, &data); err != nil {
+// ToStruct 用map填充结构
+func (m *HashMap) ToStruct(out interface{}) error {
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		DecodeHook:       StringToByteSizesHookFunc,
+		Metadata:         nil,
+		Result:           out,
+		WeaklyTypedInput: true,
+	})
+	if err != nil {
 		return err
 	}
-	for _, v := range data {
-		if vals != nil {
-			for _, val := range vals {
-				if val != nil {
-					val = reflectutil.ToPointer(val)
-					valueOf := reflect.ValueOf(val)
-					if valueOf.Type().Implements(DecoderInterface) {
-						val := valueOf.Interface().(Decoder)
-						err := val.DecodeFromBytes(v.Value)
-						if err != nil {
-							continue
-						}
-					} else {
-						err := json.Unmarshal(v.Value, val)
-						if err != nil {
-							continue
-						}
-					}
-					if reflect.TypeOf(val).Kind() != reflect.Ptr {
-						m.data[v.Key] = reflectutil.DelPointer(val)
-					} else {
-						m.data[v.Key] = val
-					}
+	return decoder.Decode(m.data)
+}
+
+func StringToByteSizesHookFunc(
+	f reflect.Type,
+	des reflect.Type,
+	data interface{}) (interface{}, error) {
+	dataVal := reflect.Indirect(reflect.ValueOf(data))
+	dataKind := getKind(dataVal)
+	//dataType := dataVal.Type()
+	desKind := getKindByKind(des.Kind())
+
+	switch {
+	case dataKind == reflect.String:
+		if i, ok := parseStr(des, data.(string)); ok {
+			return i, nil
+		}
+	case dataKind == reflect.Slice,
+		dataKind == reflect.Array:
+		// todo xwc1125 []byte转换
+		dataType := dataVal.Type()
+		elemKind := dataType.Elem().Kind()
+		switch elemKind {
+		case reflect.Uint8:
+			var uints []uint8
+			if dataKind == reflect.Array {
+				uints = make([]uint8, dataVal.Len(), dataVal.Len())
+				for i := range uints {
+					uints[i] = dataVal.Index(i).Interface().(uint8)
+				}
+			} else {
+				uints = dataVal.Interface().([]uint8)
+			}
+			switch {
+			case desKind == reflect.Uint:
+				return convutil.BytesToUint64(uints)
+			case desKind == reflect.Int:
+				return convutil.BytesToInt64(uints)
+			case desKind == reflect.Bool:
+				return convutil.BytesToBool(uints)
+			default:
+				if i, ok := parseBytes(des, uints); ok {
+					return i, nil
 				}
 			}
-		} else {
-			m.data[v.Key] = v.Value
 		}
 	}
-	return nil
+	return data, nil
+}
+
+func parseStr(des reflect.Type, data string) (interface{}, bool) {
+	switch des {
+	case reflect.TypeOf(types.Address{}):
+		address := types.HexToAddress(data)
+		return address, true
+	case reflect.TypeOf(types.Hash{}):
+		hash := types.HexToHash(data)
+		return hash, true
+	case reflect.TypeOf(math.HexOrDecimal256{}):
+		result := new(math.HexOrDecimal256)
+		result.UnmarshalText([]byte(data))
+		return result, true
+	case reflect.TypeOf(big.Int{}):
+		result := new(big.Int)
+		result.UnmarshalText([]byte(data))
+		return result, true
+	case reflect.TypeOf(hexutil.Bytes{}):
+		result := hexutil.MustDecode(data)
+		return result, true
+	}
+	return data, false
+}
+func parseBytes(des reflect.Type, data []byte) (interface{}, bool) {
+	switch des {
+	case reflect.TypeOf(types.Address{}):
+		if len(data) == types.AddressLength {
+			return types.BytesToAddress(data), true
+		}
+		return types.HexToAddress(string(data)), true
+	case reflect.TypeOf(types.Hash{}):
+		if len(data) == types.HashLength {
+			return types.BytesToHash(data), true
+		}
+		return types.HexToHash(string(data)), true
+	case reflect.TypeOf(math.HexOrDecimal256{}):
+		result := new(math.HexOrDecimal256)
+		result.UnmarshalText(data)
+		return result, true
+	case reflect.TypeOf(big.Int{}):
+		result := new(big.Int)
+		result.UnmarshalText(data)
+		return result, true
+	case reflect.TypeOf(hexutil.Bytes{}):
+		return data, true
+	}
+	return data, false
+}
+
+func getKind(val reflect.Value) reflect.Kind {
+	kind := val.Kind()
+	return getKindByKind(kind)
+}
+func getKindByKind(kind reflect.Kind) reflect.Kind {
+	switch {
+	case kind >= reflect.Int && kind <= reflect.Int64:
+		return reflect.Int
+	case kind >= reflect.Uint && kind <= reflect.Uint64:
+		return reflect.Uint
+	case kind >= reflect.Float32 && kind <= reflect.Float64:
+		return reflect.Float32
+	default:
+		return kind
+	}
 }

@@ -1,7 +1,6 @@
 // Package scrypt
 //
 // @author: xwc1125
-// @date: 2020/10/25
 package scrypt
 
 import (
@@ -12,7 +11,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/crypto/hash/sha3"
+	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
 	"github.com/pborman/uuid"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/crypto/scrypt"

@@ -23,7 +23,7 @@ import (
 )
 
 func bigFromHex(hex string) *big.Int {
-	return new(big.Int).SetBytes(hexutil.FromHex(hex))
+	return new(big.Int).SetBytes(hexutil.MustDecode(hex))
 }
 
 // decodeFieldElement expects 64 byte input with zero top 16 bytes,

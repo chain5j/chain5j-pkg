@@ -1,7 +1,6 @@
 // Package queue
 //
 // @author: xwc1125
-// @date: 2020/3/20
 package queue
 
 type Iterator struct {

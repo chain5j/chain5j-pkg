@@ -1,7 +1,6 @@
 // Package linkedHashMap
-// 
+//
 // @author: xwc1125
-// @date: 2020/12/22
 package linkedHashMap
 
 import (
@@ -35,35 +34,6 @@ func TestLinkedHashMap(t *testing.T) {
 		}
 	}
 	log.Println(fmt.Sprintf("【ids】len=%d", len(ids)))
-	// 查询
-	startTime = dateutil.CurrentTime()
-	var qCount = 0
-	for i, id := range ids {
-		v := linkedHashMap.Get(id)
-		if v == nil {
-			log.Println(fmt.Sprintf("【Get】no key,id=%s,i=%s", id, i))
-			qCount++
-		} else {
-			//log.Println(fmt.Sprintf("key=%s,v=%s", id, v))
-		}
-	}
-	endTime = dateutil.CurrentTime()
-	log.Println(fmt.Sprintf("【查询】end-start=%d,qCount=%d", endTime-startTime, qCount))
-	// 删除
-	startTime = dateutil.CurrentTime()
-	var dCount = 0
-	for i, id := range ids {
-		b, v := linkedHashMap.Remove(id)
-		if !b {
-			log.Println(fmt.Sprintf("【Remove】no key2,id=%s,i=%s", id, i))
-			dCount++
-			_ = v
-		} else {
-			//log.Println(fmt.Sprintf("[rm]id=%s,i=%s", id, v))
-		}
-	}
-	endTime = dateutil.CurrentTime()
-	log.Println(fmt.Sprintf("【删除】end-start=%d,dCount=%d", endTime-startTime, dCount))
 }
 
 func TestLinkedHashMapBatch(t *testing.T) {
@@ -80,12 +50,12 @@ func TestLinkedHashMapBatch(t *testing.T) {
 
 	var count = 0
 	list := linkedHashMap.GetLinkList()
-	if list != nil && list.GetLength() > 0 {
-		head := list.GetHead()
+	if list != nil && list.Len() > 0 {
+		head := list.Front()
 		for head != nil && count < 10 {
-			fmt.Println(head.GetVal())
+			fmt.Println(head.Value)
 			count++
-			head = head.GetNext()
+			head = head.Next()
 		}
 	}
 
@@ -97,25 +67,6 @@ func TestLinkedHashMapBatch(t *testing.T) {
 		}
 	}
 	log.Println(fmt.Sprintf("【ids】len=%d", len(ids)))
-	// 查询
-	startTime = dateutil.CurrentTime()
-	var qCount = 0
-	keys := make([]string, 0)
-	for _, id := range ids {
-		keys = append(keys, id)
-	}
-
-	gets := linkedHashMap.BatchGet(keys...)
-	endTime = dateutil.CurrentTime()
-	log.Println(fmt.Sprintf("【查询】end-start=%d,qCount=%d,gets=%d", endTime-startTime, qCount, len(gets)))
-	// 删除
-	startTime = dateutil.CurrentTime()
-	var dCount = 0
-
-	removes := linkedHashMap.BatchRemove(keys...)
-	dCount = len(removes)
-	endTime = dateutil.CurrentTime()
-	log.Println(fmt.Sprintf("【删除】end-start=%d,dCount=%d", endTime-startTime, dCount))
 }
 
 func add(linkedHashMap *LinkedHashMap, index int, count int, wg *sync.WaitGroup) {

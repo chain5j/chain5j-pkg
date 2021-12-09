@@ -1,7 +1,6 @@
 // Package mathutil
 //
 // @author: xwc1125
-// @date: 2020/11/19
 package mathutil
 
 // If 三元表达式

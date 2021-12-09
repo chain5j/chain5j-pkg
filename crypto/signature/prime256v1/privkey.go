@@ -3,7 +3,6 @@ package prime256v1
 import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
-	"crypto/rand"
 	"io"
 	"math/big"
 )
@@ -18,10 +17,6 @@ const (
 // package.
 type PrivateKey ecdsa.PrivateKey
 
-func GenerateECDSAKey(curve elliptic.Curve) (*ecdsa.PrivateKey, error) {
-	return GenerateECDSAKeyWithRand(curve, rand.Reader)
-}
-
 func GenerateECDSAKeyWithRand(curve elliptic.Curve, rand io.Reader) (*ecdsa.PrivateKey, error) {
 	return ecdsa.GenerateKey(curve, rand)
 }
@@ -29,7 +24,7 @@ func GenerateECDSAKeyWithRand(curve elliptic.Curve, rand io.Reader) (*ecdsa.Priv
 // GeneratePrivateKey is a wrapper for ecdsa.GenerateKey that returns a PrivateKey
 // instead of the normal ecdsa.PrivateKey.
 func GeneratePrivateKey(curve elliptic.Curve) (*PrivateKey, error) {
-	key, err := GenerateECDSAKey(curve)
+	key, err := GenerateKey(curve)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +89,7 @@ func (p *PrivateKey) ToECDSA() *ecdsa.PrivateKey {
 // is deterministic (same message and same key yield the same signature) and
 // canonical in accordance with RFC6979 and BIP0062.
 func (p *PrivateKey) Sign(hash []byte) (*Signature, error) {
-	return signRFC6979(p, hash)
+	return signRFC6979((*ecdsa.PrivateKey)(p), hash)
 }
 
 // Serialize returns the private key number d as a big-endian binary-encoded

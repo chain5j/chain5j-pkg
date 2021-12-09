@@ -1,7 +1,6 @@
 // Package tree
 // 
 // @author: xwc1125
-// @date: 2020/1/14
 package tree
 
 import (

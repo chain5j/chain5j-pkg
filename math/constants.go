@@ -1,7 +1,6 @@
 // Package math
 //
 // @author: xwc1125
-// @date: 2021/8/23
 package math
 
 import "math/big"

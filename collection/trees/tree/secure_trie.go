@@ -66,7 +66,7 @@ func NewSecure(root types.Hash, db *Database) (*SecureTrie, error) {
 func (t *SecureTrie) Get(key []byte) []byte {
 	res, err := t.TryGet(key)
 	if err != nil {
-		logger.Error(fmt.Sprintf("Unhandled trie error: %v", err))
+		log().Error(fmt.Sprintf("Unhandled trie error: %v", err))
 	}
 	return res
 }
@@ -86,7 +86,7 @@ func (t *SecureTrie) TryGet(key []byte) ([]byte, error) {
 // stored in the trie.
 func (t *SecureTrie) Update(key, value []byte) {
 	if err := t.TryUpdate(key, value); err != nil {
-		logger.Error(fmt.Sprintf("Unhandled trie error: %v", err))
+		log().Error(fmt.Sprintf("Unhandled trie error: %v", err))
 	}
 }
 
@@ -111,7 +111,7 @@ func (t *SecureTrie) TryUpdate(key, value []byte) error {
 // Delete removes any existing value for key from the trie.
 func (t *SecureTrie) Delete(key []byte) {
 	if err := t.TryDelete(key); err != nil {
-		logger.Error(fmt.Sprintf("Unhandled trie error: %v", err))
+		log().Error(fmt.Sprintf("Unhandled trie error: %v", err))
 	}
 }
 

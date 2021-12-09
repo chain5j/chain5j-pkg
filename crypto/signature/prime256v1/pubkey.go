@@ -132,6 +132,9 @@ func (p PublicKey) Serialize() []byte {
 
 // SerializeCompressed serializes a public key in a 33-byte compressed format.
 func (p PublicKey) SerializeCompressed() []byte {
+	if p.Curve != elliptic.P256() {
+		return nil
+	}
 	b := make([]byte, 0, PubKeyBytesLenCompressed)
 	format := pubkeyCompressed
 	if isOdd(p.Y) {
@@ -184,6 +187,9 @@ func (p PublicKey) GetY() *big.Int {
 }
 
 func DecompressPubkey(curve elliptic.Curve, pubkey []byte) (x, y *big.Int) {
+	if curve != elliptic.P256() {
+		return nil, nil
+	}
 	key, err := ParsePubKey(curve, pubkey)
 	if err != nil {
 		return nil, nil

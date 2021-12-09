@@ -1,7 +1,6 @@
 // Package types
 //
 // @author: xwc1125
-// @date: 2020/10/19
 package types
 
 import (
@@ -39,11 +38,11 @@ func DomainToAddress(s string) Address {
 	if strings.Contains(s, "@") {
 		split := strings.Split(s, "@")
 		if hexutil.IsHex(split[0]) {
-			return BytesToAddress(hexutil.FromHex(split[0]))
+			return BytesToAddress(hexutil.MustDecode(split[0]))
 		}
 		return StringToAddress(split[0])
 	}
-	return BytesToAddress(hexutil.FromHex(s))
+	return BytesToAddress(hexutil.MustDecode(s))
 }
 
 // FromDomainAddress domainAddress 转换为DomainAddress对象。addr格式：xxx@chain5j.com:0xxxxxxxx
@@ -56,7 +55,7 @@ func FromDomainAddress(addr string) DomainAddress {
 		var a DomainAddress
 		a.DomainAddr = split[0]
 		if len(split) == 2 {
-			a.Addr = BytesToAddress(hexutil.FromHex(split[1]))
+			a.Addr = BytesToAddress(hexutil.MustDecode(split[1]))
 		}
 		return a
 	}
@@ -88,7 +87,7 @@ func (a DomainAddress) FromStr(addr string) (Addr, error) {
 		}
 		a.DomainAddr = split[0]
 		if len(split) == 2 {
-			a.Addr = BytesToAddress(hexutil.FromHex(split[1]))
+			a.Addr = BytesToAddress(hexutil.MustDecode(split[1]))
 		}
 		return a, nil
 	}

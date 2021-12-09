@@ -1,7 +1,6 @@
 // Package cli
 //
 // @author: xwc1125
-// @date: 2021/9/2
 package cli
 
 import (

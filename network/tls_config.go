@@ -1,7 +1,6 @@
 // Package network
 //
 // @author: xwc1125
-// @date: 2021/7/27
 package network
 
 type TlsMod string

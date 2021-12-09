@@ -1,198 +1,154 @@
 // Package linkedHashMap
 //
 // @author: xwc1125
-// @date: 2020/12/22
 package linkedHashMap
 
 import (
+	"container/list"
+	"github.com/chain5j/logger"
 	"sync"
 )
 
-type LinkedHashMapNode struct {
-	linklistNode *LinkListNode
-	val          interface{}
+type Node struct {
+	node *list.Element
+	val  interface{}
 }
 
 type LinkedHashMap struct {
-	linklist *LinkList
-	hashmap  map[string]interface{}
-	mutex    *sync.RWMutex
+	linklistLock *sync.RWMutex
+	linklist     *list.List
+	hashmap      *sync.Map
 }
 
 func NewLinkedHashMap() *LinkedHashMap {
 	return &LinkedHashMap{
-		linklist: NewLinkList(),
-		hashmap:  make(map[string]interface{}),
-		mutex:    &sync.RWMutex{},
+		linklist:     list.New(),
+		linklistLock: new(sync.RWMutex),
+		hashmap:      new(sync.Map),
 	}
 }
 
-func (hm *LinkedHashMap) Lock() {
-	hm.mutex.Lock()
+func (m *LinkedHashMap) Lock() {
+	m.linklistLock.Lock()
 }
 
-func (hm *LinkedHashMap) Unlock() {
-	hm.mutex.Unlock()
+func (m *LinkedHashMap) Unlock() {
+	m.linklistLock.Unlock()
 }
 
-func (hm *LinkedHashMap) RLock() {
-	hm.mutex.RLock()
+func (m *LinkedHashMap) RLock() {
+	m.linklistLock.RLock()
 }
 
-func (hm *LinkedHashMap) RUnlock() {
-	hm.mutex.RUnlock()
+func (m *LinkedHashMap) RUnlock() {
+	m.linklistLock.RUnlock()
 }
 
 // Add 添加
-func (hm *LinkedHashMap) Add(key string, val interface{}) bool {
-	hm.RLock()
-	_, isExists := hm.hashmap[key]
-	hm.RUnlock()
+func (m *LinkedHashMap) Add(key interface{}, val interface{}) bool {
+	_, isExists := m.hashmap.Load(key)
 	if isExists {
 		return false
 	}
 
-	hm.Lock()
-	defer hm.Unlock()
-	linkListNode := hm.linklist.AddToTail(key)
-	hm.hashmap[key] = &LinkedHashMapNode{
-		linklistNode: linkListNode,
-		val:          val,
+	m.Lock()
+	linkListNode := m.linklist.PushBack(key)
+	m.Unlock()
+	m.hashmap.Store(key, &Node{
+		node: linkListNode,
+		val:  val,
+	})
+
+	return true
+}
+func (m *LinkedHashMap) AddFront(key interface{}, val interface{}) bool {
+	_, isExists := m.hashmap.Load(key)
+	if isExists {
+		return false
 	}
+
+	m.Lock()
+	linkListNode := m.linklist.PushFront(key)
+	m.Unlock()
+	m.hashmap.Store(key, &Node{
+		node: linkListNode,
+		val:  val,
+	})
 
 	return true
 }
 
 // Get 获取数据
-func (hm *LinkedHashMap) Get(key string) interface{} {
-	hm.RLock()
-	originLinkedHashMapNode, isExists := hm.hashmap[key]
-	hm.RUnlock()
+func (m *LinkedHashMap) Get(key interface{}) (interface{}, bool) {
+	node, isExists := m.hashmap.Load(key)
 	if !isExists {
-		return nil
+		return nil, false
 	}
 
-	return (originLinkedHashMapNode.(*LinkedHashMapNode)).val
+	return &node.(*Node).val, true
+}
+
+// Exist 判断是否存在
+func (m *LinkedHashMap) Exist(key interface{}) bool {
+	_, isExists := m.hashmap.Load(key)
+	return isExists
 }
 
 // Remove 删除
-func (hm *LinkedHashMap) Remove(key string) (bool, interface{}) {
-	hm.Lock()
-	originLinkedHashMapNode, isExists := hm.hashmap[key]
-	hm.Unlock()
+func (m *LinkedHashMap) Remove(key interface{}) {
+	node, isExists := m.hashmap.Load(key)
 	if !isExists {
-		i := hm.Len()
-		_ = i
-		return false, nil
+		return
 	}
 
-	linkedHashMapNode := originLinkedHashMapNode.(*LinkedHashMapNode)
-
-	hm.Lock()
-	delete(hm.hashmap, key)
-	hm.Unlock()
-	hm.linklist.RemoveNode(linkedHashMapNode.linklistNode)
-	return true, linkedHashMapNode.val
+	m.linklistLock.Lock()
+	m.hashmap.Delete(key)
+	m.linklistLock.Unlock()
+	m.linklist.Remove(node.(*Node).node)
+	return
 }
 
 // Len 获取len
-func (hm *LinkedHashMap) Len() int {
-	return len(hm.hashmap)
+func (m *LinkedHashMap) Len() int {
+	return m.linklist.Len()
 }
 
 // =========批量处理=========
 
 // BatchAdd 批量添加
-func (hm *LinkedHashMap) BatchAdd(kvs ...KV) []KV {
+func (m *LinkedHashMap) BatchAdd(kvs ...KV) {
 	if kvs == nil || len(kvs) == 0 {
-		return nil
+		return
 	}
 	var (
-		existKVs   = make([]KV, 0)
 		noExistKVs = make([]KV, 0)
 	)
 
-	hm.RLock()
 	for _, kv := range kvs {
-		_, isExists := hm.hashmap[kv.Key]
-		if isExists {
-			existKVs = append(existKVs, kv)
-		} else {
-			noExistKVs = append(noExistKVs, kv)
-		}
-	}
-	hm.RUnlock()
-	if len(noExistKVs) == 0 {
-		return existKVs
-	}
-
-	hm.Lock()
-	defer hm.Unlock()
-	for _, kv := range noExistKVs {
-		linkListNode := hm.linklist.AddToTail(kv.Key)
-		hm.hashmap[kv.Key] = &LinkedHashMapNode{
-			linklistNode: linkListNode,
-			val:          kv.Val,
-		}
-	}
-
-	return existKVs
-}
-
-// BatchGet 批量获取
-func (hm *LinkedHashMap) BatchGet(keys ...string) []KV {
-	if keys == nil || len(keys) == 0 {
-		return nil
-	}
-	hm.RLock()
-	kvs := make([]KV, len(keys))
-	for i, key := range keys {
-		originLinkedHashMapNode, isExists := hm.hashmap[key]
+		_, isExists := m.hashmap.Load(kv.Key)
 		if !isExists {
-			kvs[i] = KV{
-				Key: key,
-				Val: nil,
-			}
+			noExistKVs = append(noExistKVs, kv)
 		} else {
-			kvs[i] = KV{
-				Key: key,
-				Val: (originLinkedHashMapNode.(*LinkedHashMapNode)).val,
-			}
+			logger.Warn("hashmap exist key", "key", kv.Key)
 		}
 	}
-	hm.RUnlock()
-	return kvs
-}
+	if len(noExistKVs) == 0 {
+		return
+	}
 
-// BatchRemove 批量删除
-func (hm *LinkedHashMap) BatchRemove(keys ...string) []KV {
-	if keys == nil || len(keys) == 0 {
-		return nil
+	m.linklistLock.Lock()
+	defer m.linklistLock.Unlock()
+	for _, kv := range noExistKVs {
+		linkListNode := m.linklist.PushBack(kv.Key)
+		m.hashmap.Store(kv.Key, &Node{
+			node: linkListNode,
+			val:  kv.Val,
+		})
 	}
-	kvs := make([]KV, 0)
-	hm.RLock()
-	for _, key := range keys {
-		originLinkedHashMapNode, isExists := hm.hashmap[key]
-		if isExists {
-			linkedHashMapNode := originLinkedHashMapNode.(*LinkedHashMapNode)
-			kvs = append(kvs, KV{
-				Key: key,
-				Val: linkedHashMapNode,
-			})
-		}
-	}
-	hm.RUnlock()
-
-	hm.Lock()
-	for _, kv := range kvs {
-		delete(hm.hashmap, kv.Key)
-		hm.linklist.RemoveNode(kv.Val.(*LinkedHashMapNode).linklistNode)
-	}
-	hm.Unlock()
-	return kvs
+	return
 }
 
 // GetLinkList 获取linklist
-func (hm *LinkedHashMap) GetLinkList() *LinkList {
-	return hm.linklist
+func (m *LinkedHashMap) GetLinkList() *list.List {
+	return m.linklist
 }

@@ -9,7 +9,9 @@
 package prque
 
 import (
+	"fmt"
 	"math/rand"
+	"sort"
 	"testing"
 )
 
@@ -127,4 +129,17 @@ func BenchmarkPop(b *testing.B) {
 	for !queue.Empty() {
 		queue.Pop()
 	}
+}
+
+func TestPeek(t *testing.T) {
+	prque := New()
+	prque.Push("1", 1)
+	prque.Push("3", 3)
+	prque.Push("5", 5)
+	prque.Push("2", 2)
+	prque.Push("4", 4)
+	sort.Sort(prque.cont)
+	front, f := prque.PeekFront()
+	fmt.Println(front, f)
+
 }

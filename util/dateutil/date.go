@@ -2,7 +2,7 @@ package dateutil
 
 import (
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/logger"
+	"github.com/chain5j/logger"
 	"strings"
 	"time"
 )
@@ -23,8 +23,8 @@ import (
 */
 type DateFormat string
 
+// 时间格式化字符串
 const (
-	// 时间格式化字符串
 	Default               DateFormat = "2006-01-02 15:04:05"
 	YYYY                  DateFormat = "2006"
 	YYYY_MM               DateFormat = "2006-01"
@@ -53,44 +53,52 @@ func (d DateFormat) String() string {
 // 中国时区
 var SysTimeLocation, _ = time.LoadLocation("Asia/Chongqing")
 
-// 返回毫秒
+// CurrentTime 返回毫秒
 func CurrentTime() int64 {
-	return time.Now().UnixNano() / 1e6
+	return time.Now().UnixMilli()
 }
 
-// 纳秒转毫秒
+// CurrentTimeSecond 返回秒
+func CurrentTimeSecond() int64 {
+	return time.Now().Unix()
+}
+
+// NanoToMillisecond 纳秒转毫秒
 func NanoToMillisecond(t int64) int64 {
 	return t / 1e6
 }
 
-// 纳秒转秒
+// NanoToSecond 纳秒转秒
 func NanoToSecond(t int64) int64 {
 	return t / 1e9
 }
 
-// 秒转time
+// SecondToTime 秒转time
 func SecondToTime(t int64) time.Time {
 	return time.Unix(t, 0)
 }
 
+// MillisecondToTime 毫秒转time
 func MillisecondToTime(t int64) time.Time {
-	return time.Unix(0, t*1e6)
+	return time.UnixMilli(t)
 }
+
+// NanoToTime 纳秒转time
 func NanoToTime(t int64) time.Time {
 	return time.Unix(0, t)
 }
 
-// 格式化输出
+// Format 格式化输出
 func Format(t time.Time, format DateFormat) string {
 	return t.Format(format.String())
 }
 
-// 秒转成format
+// SecondFormat 秒转成format
 func SecondFormat(t int64, format DateFormat) string {
 	return Format(SecondToTime(t), format)
 }
 
-// 时间转本地化
+// ParseInLocation 时间转本地化
 // s时间格式：如"2017-05-11 14:06:06"
 // format：格式
 // location：时区(Location)
@@ -99,6 +107,7 @@ func ParseInLocation(s string, format DateFormat, location *time.Location) {
 	time.ParseInLocation(format.String(), s, location)
 }
 
+// LoadLocation 获取location
 func LoadLocation(loc string) *time.Location {
 	// 默认UTC
 	//loc, err := time.LoadLocation("")

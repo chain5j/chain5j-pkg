@@ -3,8 +3,8 @@ package leveldb
 import (
 	"fmt"
 	"github.com/chain5j/chain5j-pkg/database/kvstore"
-	"github.com/chain5j/chain5j-pkg/logger"
 	"github.com/chain5j/chain5j-pkg/types"
+	"github.com/chain5j/logger"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/filter"
@@ -58,7 +58,7 @@ func New(file string, cache int, handles int, namespace string) (*Database, erro
 		handles = minHandles
 	}
 	logger := logger.New("levelDB")
-	logger.Info("Allocated cache and file handles", "database", file, "cache", types.StorageSize(cache*1024*1024), "handles", handles)
+	logger.Info("allocated cache and file handles", "database", file, "cache", types.StorageSize(cache*1024*1024), "handles", handles)
 
 	// Open the db and recover any potential corruptions
 	db, err := leveldb.OpenFile(file, &opt.Options{

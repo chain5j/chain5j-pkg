@@ -1,8 +1,7 @@
-// Package parseutil
+// Package reflectutil
 //
 // @author: xwc1125
-// @date: 2019/10/29
-package parseutil
+package reflectutil
 
 import (
 	"log"

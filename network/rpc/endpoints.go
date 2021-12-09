@@ -26,7 +26,7 @@ import (
 
 // StartHTTPEndpoint starts the HTTP RPC endpoint, configured with cors/vhosts/modules
 func StartHTTPEndpoint(httpConfig HttpConfig, tlsConfig network.TlsConfig, apis []API) (net.Listener, *Server, error) {
-	log := log15.New("rpc_http")
+	log := log15().New("rpc_http")
 	// Generate the whitelist based on the allowed modules
 	whitelist := make(map[string]bool)
 	for _, module := range httpConfig.Modules {
@@ -75,7 +75,7 @@ func getTls(isServer bool, tlsConfig network.TlsConfig) (*tls.Config, error) {
 			// 添加证书
 			cert, err := tls.LoadX509KeyPair(tlsConfig.CertFile, tlsConfig.KeyFile)
 			if err != nil {
-				log15.Error("tls.LoadX509KeyPair err", "err", err)
+				log15().Error("tls.LoadX509KeyPair err", "err", err)
 				return nil, err
 			}
 			return &tls.Config{
@@ -90,7 +90,7 @@ func getTls(isServer bool, tlsConfig network.TlsConfig) (*tls.Config, error) {
 	case network.TwoWay:
 		cert, err := tls.LoadX509KeyPair(tlsConfig.CertFile, tlsConfig.KeyFile)
 		if err != nil {
-			log15.Error("tls.LoadX509KeyPair err", "err", err)
+			log15().Error("tls.LoadX509KeyPair err", "err", err)
 			return nil, err
 		}
 
@@ -99,12 +99,12 @@ func getTls(isServer bool, tlsConfig network.TlsConfig) (*tls.Config, error) {
 		for _, root := range tlsConfig.CaRoots {
 			certBytes, err := ioutil.ReadFile(root)
 			if err != nil {
-				log15.Error("unable to read ca.pem", "err", err)
+				log15().Error("unable to read ca.pem", "err", err)
 				return nil, err
 			}
 			ok := certPool.AppendCertsFromPEM(certBytes)
 			if !ok {
-				log15.Error("failed to parse root certificate", "err", err)
+				log15().Error("failed to parse root certificate", "err", err)
 				return nil, err
 			}
 		}
@@ -129,7 +129,7 @@ func getTls(isServer bool, tlsConfig network.TlsConfig) (*tls.Config, error) {
 
 // StartWSEndpoint starts a websocket endpoint
 func StartWSEndpoint(wsConfig WSConfig, tlsConfig network.TlsConfig, apis []API) (net.Listener, *Server, error) {
-	log := log15.New("ws")
+	log := log15().New("ws")
 	// Generate the whitelist based on the allowed modules
 	whitelist := make(map[string]bool)
 	for _, module := range wsConfig.Modules {
@@ -172,7 +172,7 @@ func StartWSEndpoint(wsConfig WSConfig, tlsConfig network.TlsConfig, apis []API)
 
 // StartIPCEndpoint starts an IPC endpoint.
 func StartIPCEndpoint(ipcEndpoint string, apis []API) (net.Listener, *Server, error) {
-	log := log15.New("ipc")
+	log := log15().New("ipc")
 	// Register all the APIs exposed by the services.
 	handler := NewServer()
 	for _, api := range apis {

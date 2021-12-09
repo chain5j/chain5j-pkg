@@ -1,7 +1,6 @@
 // Package gmsm
 //
 // @author: xwc1125
-// @date: 2020/3/2
 package gmsm
 
 import (

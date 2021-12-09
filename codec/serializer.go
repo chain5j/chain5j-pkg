@@ -1,7 +1,6 @@
 // Package codec
 //
 // @author: xwc1125
-// @date: 2021/8/28
 package codec
 
 // Serializer 序列化

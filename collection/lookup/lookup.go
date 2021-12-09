@@ -1,7 +1,6 @@
 // Package lookup
 //
 // @author: xwc1125
-// @date: 2019/11/20
 package lookup
 
 import (

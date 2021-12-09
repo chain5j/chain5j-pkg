@@ -1,12 +1,11 @@
 // Package hashalg
 //
 // @author: xwc1125
-// @date: 2020/3/2
 package hashalg
 
 import (
 	"github.com/chain5j/chain5j-pkg/codec/rlp"
-	"github.com/chain5j/chain5j-pkg/crypto/hash/sha3"
+	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
 	"github.com/chain5j/chain5j-pkg/types"
 )
 

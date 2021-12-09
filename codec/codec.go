@@ -1,7 +1,6 @@
 // Package codec
 //
 // @author: xwc1125
-// @date: 2020/10/19
 package codec
 
 import "github.com/chain5j/chain5j-pkg/codec/rlp"

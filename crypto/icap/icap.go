@@ -1,7 +1,6 @@
 // Package icap
 //
 // @author: xwc1125
-// @date: 2021/4/14
 package icap
 
 import (

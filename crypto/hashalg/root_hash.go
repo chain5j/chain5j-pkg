@@ -17,32 +17,24 @@
 package hashalg
 
 import (
-	"github.com/chain5j/chain5j-pkg/codec"
 	"github.com/chain5j/chain5j-pkg/collection/trees/tree"
 	"github.com/chain5j/chain5j-pkg/types"
-)
-
-var (
-	EmptyRootHash, _ = RootHash(codec.Coder(), nil)
 )
 
 // DerivableList derivableList
 type DerivableList interface {
 	Len() int
+	Key(i int) []byte
 	Item(i int) []byte
 }
 
 // RootHash get list root
-func RootHash(codec codec.Codec, list DerivableList) (types.Hash, error) {
+func RootHash(list DerivableList) types.Hash {
 	trie := new(tree.Trie)
 	if list != nil {
 		for i := 0; i < list.Len(); i++ {
-			keyBytes, err := codec.Encode(i)
-			if err != nil {
-				return types.EmptyHash, err
-			}
-			trie.Update(keyBytes, list.Item(i))
+			trie.Update(list.Key(i), list.Item(i))
 		}
 	}
-	return trie.Hash(), nil
+	return trie.Hash()
 }

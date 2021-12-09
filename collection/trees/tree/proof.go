@@ -55,7 +55,7 @@ func (t *Trie) Prove(key []byte, fromLevel uint, proofDb kvstore.KeyValueWriter)
 			var err error
 			tn, err = t.resolveHash(n, nil)
 			if err != nil {
-				logger.Error(fmt.Sprintf("Unhandled trie error: %v", err))
+				log().Error(fmt.Sprintf("Unhandled trie error: %v", err))
 				return err
 			}
 		default:

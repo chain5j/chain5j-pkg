@@ -1,7 +1,6 @@
 // Package network
 //
 // @author: xwc1125
-// @date: 2020/5/29 0029
 package network
 
 import "context"

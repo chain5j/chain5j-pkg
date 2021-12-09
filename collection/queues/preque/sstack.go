@@ -38,7 +38,7 @@ func newSstack() *sstack {
 	return result
 }
 
-// Pushes a value onto the stack, expanding it if necessary. Required by
+// Push a value onto the stack, expanding it if necessary. Required by
 // heap.Interface.
 func (s *sstack) Push(data interface{}) {
 	if s.size == s.capacity {
@@ -55,7 +55,7 @@ func (s *sstack) Push(data interface{}) {
 	s.size++
 }
 
-// Pops a value off the stack and returns it. Currently no shrinking is done.
+// Pop a value off the stack and returns it. Currently no shrinking is done.
 // Required by heap.Interface.
 func (s *sstack) Pop() (res interface{}) {
 	s.size--
@@ -67,25 +67,25 @@ func (s *sstack) Pop() (res interface{}) {
 	res, s.active[s.offset] = s.active[s.offset], nil
 	return
 }
+func (s *sstack) PeekFront() (res interface{}) {
+	index := s.offset - 1
+	if index < 0 {
+		return nil
+	}
+	res = s.active[index]
+	return
+}
 
-// Returns the length of the stack. Required by sort.Interface.
 func (s *sstack) Len() int {
 	return s.size
 }
-
-// Compares the priority of two elements of the stack (higher is first).
-// Required by sort.Interface.
 func (s *sstack) Less(i, j int) bool {
 	return s.blocks[i/blockSize][i%blockSize].priority > s.blocks[j/blockSize][j%blockSize].priority
 }
-
-// Swaps two elements in the stack. Required by sort.Interface.
 func (s *sstack) Swap(i, j int) {
 	ib, io, jb, jo := i/blockSize, i%blockSize, j/blockSize, j%blockSize
 	s.blocks[ib][io], s.blocks[jb][jo] = s.blocks[jb][jo], s.blocks[ib][io]
 }
-
-// Resets the stack, effectively clearing its contents.
 func (s *sstack) Reset() {
 	*s = *newSstack()
 }

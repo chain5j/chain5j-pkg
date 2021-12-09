@@ -1,8 +1,9 @@
 // Package types
 //
 // @author: xwc1125
-// @date: 2020/10/16
 package types
+
+const TxTypeUnknown = "UNKNOWN"
 
 // TxType the transaction type
 type TxType string

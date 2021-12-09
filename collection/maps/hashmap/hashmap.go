@@ -1,13 +1,13 @@
 // Package hashmap
 //
 // @author: xwc1125
-// @date: 2019/10/29
 package hashmap
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/util/parseutil"
+	"github.com/chain5j/chain5j-pkg/codec"
+	"github.com/chain5j/chain5j-pkg/util/reflectutil"
 	"reflect"
 	"sort"
 	"sync"
@@ -185,7 +185,7 @@ func (m *HashMap) GetValue(k string) reflect.Value {
 	var sv reflect.Value
 	if ok {
 		rv = v
-		sv = parseutil.GetValue(rv)
+		sv = reflectutil.GetValue(rv)
 	}
 	return sv
 }
@@ -199,12 +199,12 @@ func (m *HashMap) GetValues(k string) []reflect.Value {
 	var sv []reflect.Value
 	if ok {
 		rv = v
-		sv = parseutil.GetValues(rv)
+		sv = reflectutil.GetValues(rv)
 	}
 	return sv
 }
 
-// ContainsKey 判断是否包括key，如果包含key返回value的类型
+// HasKey 判断是否包括key，如果包含key返回value的类型
 func (m *HashMap) HasKey(k string) (bool, string) {
 	m.lock()
 	v, ok := m.data[k]
@@ -253,15 +253,9 @@ func (m *HashMap) Size() int {
 	return len(m.data)
 }
 
-// KV ...
-type KV struct {
-	Key   string
-	Value interface{}
-}
-
-// 排序
+// Sort 排序
 func (m *HashMap) Sort() []KV {
-	var newm []KV
+	var kvs []KV
 	var keyArray []string
 	m.lock()
 	for k, _ := range m.data {
@@ -273,10 +267,10 @@ func (m *HashMap) Sort() []KV {
 			Key:   v,
 			Value: m.data[v],
 		}
-		newm = append(newm, *kv)
+		kvs = append(kvs, *kv)
 	}
 	m.unlock()
-	return newm
+	return kvs
 }
 
 // String ...
@@ -295,4 +289,8 @@ func (m *HashMap) UnmarshalJSON(bytes []byte) error {
 		m.isSafe = true
 	}
 	return json.Unmarshal(bytes, &m.data)
+}
+
+func (m *HashMap) Decode(data []byte) error {
+	return codec.Coder().Decode(data, &m)
 }

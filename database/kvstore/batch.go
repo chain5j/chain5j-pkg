@@ -1,7 +1,6 @@
 // Package kvstore
 // 
 // @author: xwc1125
-// @date: 2020/10/11
 package kvstore
 
 // IdealBatchSize defines the size of the data batches should ideally add in one

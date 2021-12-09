@@ -1,7 +1,6 @@
 // Package rpc
 //
 // @author: xwc1125
-// @date: 2020/11/18
 package rpc
 
 import (

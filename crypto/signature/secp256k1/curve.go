@@ -1,7 +1,6 @@
 // Package secp256k1
 // 
 // @author: xwc1125
-// @date: 2020/8/8
 package secp256k1
 
 import (

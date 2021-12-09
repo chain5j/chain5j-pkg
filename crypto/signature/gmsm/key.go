@@ -1,27 +1,19 @@
 // Package gmsm
 //
 // @author: xwc1125
-// @date: 2020/3/2
 package gmsm
 
 import (
 	"crypto/ecdsa"
-	"crypto/rand"
 	"errors"
 	"github.com/tjfoc/gmsm/sm2"
 	"math/big"
 )
 
-var errInvalidPubkey = errors.New("invalid public key")
+type PrivateKey sm2.PrivateKey
+type PublicKey sm2.PublicKey
 
-// GenerateKey 生成PrivateKey
-func GenerateKey() (*ecdsa.PrivateKey, error) {
-	key, err := sm2.GenerateKey(rand.Reader)
-	if err != nil {
-		return nil, err
-	}
-	return ToECDSA(key), nil
-}
+var errInvalidPubkey = errors.New("invalid public key")
 
 // ToECDSA sm2.PrivateKey to ecdsa.PrivateKey
 func ToECDSA(p *sm2.PrivateKey) *ecdsa.PrivateKey {

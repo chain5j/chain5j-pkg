@@ -1,7 +1,6 @@
 // Package snowflake
 // 
 // @author: xwc1125
-// @date: 2021/3/25
 package snowflake
 
 import (

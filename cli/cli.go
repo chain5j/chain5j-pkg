@@ -1,7 +1,6 @@
 // Package cli
 //
 // @author: xwc1125
-// @date: 2020/10/11
 package cli
 
 import (
@@ -17,12 +16,15 @@ type Command *cobra.Command
 // Cli cobra 在使用中，如果执行过中任何的Run或RunE没有执行过，那么cobra.OnInitialize(func func1)
 // 中的func1 就不会执行
 type Cli struct {
+	appInfo *AppInfo
 	rootCmd *cobra.Command
 	viper   *viper.Viper
 
 	subCmds []Command
 
 	readConfigFunc func(viper *viper.Viper)
+	configFile     string
+	configEnv      string
 }
 
 // NewCli 创建新的命令对象
@@ -43,6 +45,7 @@ func NewCliWithViper(a *AppInfo, _viper *viper.Viper) *Cli {
 		},
 	}
 	return &Cli{
+		appInfo: a,
 		rootCmd: rootCmd,
 		viper:   _viper,
 		subCmds: make([]Command, 0),
@@ -64,17 +67,12 @@ func NewCliWithViper(a *AppInfo, _viper *viper.Viper) *Cli {
 // @params flagSetFunc flag设置的回调函数，函数中为viper及rootFlags
 // @params readConfigFunc 读取配置的回调函数
 func (cli *Cli) InitFlags(useDefaultFlags bool, flagSetFunc func(rootFlags *pflag.FlagSet), readConfigFunc func(viper *viper.Viper)) (err error) {
-	var (
-		configFile string
-		configEnv  string
-	)
-
 	// 获取当前命令行
 	{
 		rootFlags := cli.rootCmd.PersistentFlags()
 		if useDefaultFlags {
-			rootFlags.StringVar(&configFile, "config", "./conf/config.yaml", "config file (default is ./conf/config.yaml)")
-			rootFlags.StringVar(&configEnv, "env", "", "config env")
+			rootFlags.StringVar(&cli.configFile, "config", "./conf/config.yaml", "config file (default is ./conf/config.yaml)")
+			rootFlags.StringVar(&cli.configEnv, "env", "", "config env")
 		}
 		if flagSetFunc != nil {
 			flagSetFunc(rootFlags)
@@ -87,12 +85,12 @@ func (cli *Cli) InitFlags(useDefaultFlags bool, flagSetFunc func(rootFlags *pfla
 	cobra.OnInitialize(func() {
 		if useDefaultFlags {
 			// 初始化配置文件
-			if configFile != "" {
-				cli.viper.SetConfigFile(configFile)
+			if cli.configFile != "" {
+				cli.viper.SetConfigFile(cli.configFile)
 			} else {
 				// 如果含有环境类型，那么使用config_{env}
-				if configEnv != "" {
-					cli.viper.SetConfigName("config_" + configEnv)
+				if cli.configEnv != "" {
+					cli.viper.SetConfigName("config_" + cli.configEnv)
 				} else {
 					cli.viper.SetConfigName("config")
 				}
@@ -183,4 +181,19 @@ func (cli *Cli) GetInt64(key string) int64 {
 // GetBool 获取bool参数
 func (cli *Cli) GetBool(key string) bool {
 	return cli.viper.GetBool(key)
+}
+
+// GetConfigFile 获取配置文件
+func (cli *Cli) GetConfigFile() string {
+	return cli.configFile
+}
+
+// GetConfigEnv 获取环境
+func (cli *Cli) GetConfigEnv() string {
+	return cli.configEnv
+}
+
+// AppInfo 获取appInfo
+func (cli *Cli) AppInfo() *AppInfo {
+	return cli.appInfo
 }

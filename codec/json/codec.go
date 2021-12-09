@@ -1,7 +1,6 @@
 // Package json
 //
 // @author: xwc1125
-// @date: 2020/10/20
 package json
 
 import (
