@@ -228,7 +228,7 @@ func TestBigEndianByteAt(t *testing.T) {
 		{"ABCDEF0908070605040302010000000000000000000000000000000000000000", 500, 0x00},
 	}
 	for _, test := range tests {
-		v := new(big.Int).SetBytes(hexutil.Hex2Bytes(test.x))
+		v := new(big.Int).SetBytes(hexutil.MustDecode(test.x))
 		actual := bigEndianByteAt(v, test.y)
 		if actual != test.exp {
 			t.Fatalf("Expected  [%v] %v:th byte to be %v, was %v.", test.x, test.y, test.exp, actual)
@@ -261,7 +261,7 @@ func TestLittleEndianByteAt(t *testing.T) {
 		{"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 0xFFFF, 0x0},
 	}
 	for _, test := range tests {
-		v := new(big.Int).SetBytes(hexutil.Hex2Bytes(test.x))
+		v := new(big.Int).SetBytes(hexutil.MustDecode(test.x))
 		actual := Byte(v, 32, test.y)
 		if actual != test.exp {
 			t.Fatalf("Expected  [%v] %v:th byte to be %v, was %v.", test.x, test.y, test.exp, actual)

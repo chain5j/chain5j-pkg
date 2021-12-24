@@ -221,3 +221,10 @@ func Exp(base, exponent *big.Int) *big.Int {
 	}
 	return result
 }
+
+// BigUint64 convert big.Int to uint64
+// @return uint64: the uint64 value
+// @bool overflow: whether it overflowed in the process
+func BigUint64(v *big.Int) (uint64, bool) {
+	return v.Uint64(), v.BitLen() > 64
+}

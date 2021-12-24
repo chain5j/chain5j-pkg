@@ -49,7 +49,7 @@ var ageUnits = []struct {
 	Symbol string
 }{
 	{12 * 30 * 24 * time.Hour, "y"},
-	{30 * 24 * time.Hour, "mo"},
+	{30 * 24 * time.Hour, "M"},
 	{7 * 24 * time.Hour, "w"},
 	{24 * time.Hour, "d"},
 	{time.Hour, "h"},
@@ -62,7 +62,7 @@ var ageUnits = []struct {
 func (t PrettyAge) String() string {
 	// Calculate the time difference and handle the 0 cornercase
 	diff := time.Since(time.Time(t))
-	if diff < time.Second {
+	if diff < time.Millisecond {
 		return "0"
 	}
 	// Accumulate a precision of 3 components before returning

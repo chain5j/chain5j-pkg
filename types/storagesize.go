@@ -1,7 +1,6 @@
-// description: chain5j-pkg
+// Package types
 // 
 // @author: xwc1125
-// @date: 2020/10/11
 package types
 
 import (

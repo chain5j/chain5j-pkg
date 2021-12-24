@@ -1,3 +1,6 @@
+// Package types
+//
+// @author: xwc1125
 package types
 
 import "math/big"

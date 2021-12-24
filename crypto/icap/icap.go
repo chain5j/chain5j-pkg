@@ -1,7 +1,6 @@
 // Package icap
 //
 // @author: xwc1125
-// @date: 2021/4/14
 package icap
 
 import (
@@ -38,7 +37,7 @@ func ToICAP(customer Customer) (*IBanInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	enc := base36Encode(new(big.Int).SetBytes(cBytes))
+	enc := Base36Encode(new(big.Int).SetBytes(cBytes))
 	currencyLen := len(customer.Currency())
 	orgCodeLen := len(customer.OrgCode())
 	// 减去2位校验码
@@ -69,7 +68,7 @@ func ParseICAP(iban IBanInfo) (*Customer, error) {
 //export ConvertAddressToICAP
 func ConvertAddressToICAP(prefix string, orgCode string, a types.Address) string {
 	prefix = strings.ToUpper(prefix)
-	enc := base36Encode(a.Big())
+	enc := Base36Encode(a.Big())
 	// zero padd encoded address to Direct ICAP length if needed
 	if len(enc) < 31 {
 		enc = join(strings.Repeat("0", 31-len(enc)), enc)
@@ -210,7 +209,7 @@ func iso13616Expand(s string) (string, error) {
 	return join(parts...), nil
 }
 
-func base36Encode(i *big.Int) string {
+func Base36Encode(i *big.Int) string {
 	var chars []rune
 	x := new(big.Int)
 	for {
@@ -244,4 +243,11 @@ func validBase36(s string) bool {
 
 func join(s ...string) string {
 	return strings.Join(s, "")
+}
+
+func LeftJoin(str string, resultLen int) string {
+	if len(str) < resultLen {
+		str = join(strings.Repeat("0", resultLen-len(str)), str)
+	}
+	return str
 }

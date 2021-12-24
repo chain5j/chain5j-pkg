@@ -1,8 +1,7 @@
-// description: chain5j-devops-tools 
-// 
+// Package network
+//
 // @author: xwc1125
-// @date: 2020/5/29 0029
-package rpc
+package network
 
 import "context"
 

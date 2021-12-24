@@ -1,3 +1,6 @@
+// Package scrypt
+//
+// @author: xwc1125
 package scrypt
 
 import (
@@ -8,6 +11,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
 	"github.com/pborman/uuid"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/crypto/scrypt"
@@ -37,7 +41,7 @@ const (
 	scryptDKLen = 32
 )
 
-// Encryptdata encrypts the data given as 'data' with the password 'auth'.
+// EncryptDataV3 encrypts the data given as 'data' with the password 'auth'.
 func EncryptDataV3(data, auth []byte, scryptN, scryptP int) (CryptoJSON, error) {
 
 	salt := make([]byte, 32)
@@ -58,7 +62,7 @@ func EncryptDataV3(data, auth []byte, scryptN, scryptP int) (CryptoJSON, error) 
 	if err != nil {
 		return CryptoJSON{}, err
 	}
-	mac := Keccak256(derivedKey[16:32], cipherText)
+	mac := sha3.Keccak256(derivedKey[16:32], cipherText)
 
 	scryptParamsJSON := make(map[string]interface{}, 5)
 	scryptParamsJSON["n"] = scryptN
@@ -157,7 +161,7 @@ func DecryptDataV3(cryptoJson CryptoJSON, auth string) ([]byte, error) {
 		return nil, err
 	}
 
-	calculatedMAC := Keccak256(derivedKey[16:32], cipherText)
+	calculatedMAC := sha3.Keccak256(derivedKey[16:32], cipherText)
 	if !bytes.Equal(calculatedMAC, mac) {
 		return nil, ErrDecrypt
 	}
@@ -203,12 +207,12 @@ func decryptKeyV1(keyProtected *encryptedKeyJSONV1, auth string) (keyBytes []byt
 		return nil, nil, err
 	}
 
-	calculatedMAC := Keccak256(derivedKey[16:32], cipherText)
+	calculatedMAC := sha3.Keccak256(derivedKey[16:32], cipherText)
 	if !bytes.Equal(calculatedMAC, mac) {
 		return nil, nil, ErrDecrypt
 	}
 
-	plainText, err := aesCBCDecrypt(Keccak256(derivedKey[:16])[:16], cipherText, iv)
+	plainText, err := aesCBCDecrypt(sha3.Keccak256(derivedKey[:16])[:16], cipherText, iv)
 	if err != nil {
 		return nil, nil, err
 	}

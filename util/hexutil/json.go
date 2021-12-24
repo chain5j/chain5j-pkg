@@ -72,6 +72,17 @@ func (b Bytes) String() string {
 	return Encode(b)
 }
 
+func (b Bytes) Bytes() []byte {
+	return []byte(b)
+}
+
+func (b Bytes) Nil() bool {
+	if b==nil {
+		return true
+	}
+	return false
+}
+
 // UnmarshalFixedJSON decodes the input as a string with 0x prefix. The length of out
 // determines the required input length. This function is commonly used to implement the
 // UnmarshalJSON method for fixed-size types.

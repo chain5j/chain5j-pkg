@@ -1,3 +1,6 @@
+// Package scrypt
+//
+// @author: xwc1125
 package scrypt
 
 import (

@@ -63,10 +63,16 @@ func Decode(input string) ([]byte, error) {
 	if len(input) == 0 {
 		return nil, ErrEmptyString
 	}
-	if !has0xPrefix(input) {
-		return nil, ErrMissingPrefix
+	var tHex string
+	if !HasHexPrefix(input) {
+		tHex = input
+	} else {
+		tHex = input[2:]
 	}
-	b, err := hex.DecodeString(input[2:])
+	if len(tHex)%2 == 1 {
+		tHex = "0" + tHex
+	}
+	b, err := hex.DecodeString(tHex)
 	if err != nil {
 		err = mapError(err)
 	}
@@ -91,6 +97,13 @@ func Encode(b []byte) string {
 	copy(enc, "0x")
 	hex.Encode(enc[2:], b)
 	return string(enc)
+}
+
+func EncodeNoPrefix(b []byte) string {
+	if len(b) == 0 {
+		return ""
+	}
+	return hex.EncodeToString(b)
 }
 
 // DecodeUint64 decodes a hex string with 0x prefix as a quantity.
@@ -190,18 +203,37 @@ func EncodeBig(bigint *big.Int) string {
 	return fmt.Sprintf("%#x", bigint)
 }
 
-func has0xPrefix(input string) bool {
+// HasHexPrefix validates str begins with '0x' or '0X'.
+func HasHexPrefix(input string) bool {
 	return len(input) >= 2 && input[0] == '0' && (input[1] == 'x' || input[1] == 'X')
+}
+
+// IsHexCharacter returns bool of c being a valid hexadecimal.
+func IsHexCharacter(c byte) bool {
+	return ('0' <= c && c <= '9') || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F')
+}
+
+// IsHex validates whether each byte is valid hexadecimal string.
+func IsHex(str string) bool {
+	if len(str)%2 != 0 {
+		return false
+	}
+	str = RemoveHexPrefix(str)
+	for _, c := range []byte(str) {
+		if !IsHexCharacter(c) {
+			return false
+		}
+	}
+	return true
 }
 
 func checkNumber(input string) (raw string, err error) {
 	if len(input) == 0 {
 		return "", ErrEmptyString
 	}
-	if !has0xPrefix(input) {
-		return "", ErrMissingPrefix
+	if HasHexPrefix(input) {
+		input = input[2:]
 	}
-	input = input[2:]
 	if len(input) == 0 {
 		return "", ErrEmptyNumber
 	}
@@ -246,7 +278,7 @@ func mapError(err error) error {
 
 var tenToAny map[int]string = map[int]string{0: "0", 1: "1", 2: "2", 3: "3", 4: "4", 5: "5", 6: "6", 7: "7", 8: "8", 9: "9", 10: "a", 11: "b", 12: "c", 13: "d", 14: "e", 15: "f", 16: "g", 17: "h", 18: "i", 19: "j", 20: "k", 21: "l", 22: "m", 23: "n", 24: "o", 25: "p", 26: "q", 27: "r", 28: "s", 29: "t", 30: "u", 31: "v", 32: "w", 33: "x", 34: "y", 35: "z", 36: ":", 37: ";", 38: "<", 39: "=", 40: ">", 41: "?", 42: "@", 43: "[", 44: "]", 45: "^", 46: "_", 47: "{", 48: "|", 49: "}", 50: "A", 51: "B", 52: "C", 53: "D", 54: "E", 55: "F", 56: "G", 57: "H", 58: "I", 59: "J", 60: "K", 61: "L", 62: "M", 63: "N", 64: "O", 65: "P", 66: "Q", 67: "R", 68: "S", 69: "T", 70: "U", 71: "V", 72: "W", 73: "X", 74: "Y", 75: "Z"}
 
-// 10进制转任意进制
+// DecimalToAny 10进制转任意进制
 func DecimalToAny(num, n int) string {
 	new_num_str := ""
 	var remainder int
@@ -275,27 +307,26 @@ func findkey(in string) int {
 	return result
 }
 
-// 任意进制转10进制
+// AnyToDecimal 任意进制转10进制
 func AnyToDecimal(num string, n int) int {
-	var new_num float64
-	new_num = 0.0
+	var newNum float64
+	newNum = 0.0
 	nNum := len(strings.Split(num, "")) - 1
 	for _, value := range strings.Split(num, "") {
 		tmp := float64(findkey(value))
 		if tmp != -1 {
-			new_num = new_num + tmp*math.Pow(float64(n), float64(nNum))
+			newNum = newNum + tmp*math.Pow(float64(n), float64(nNum))
 			nNum = nNum - 1
 		} else {
 			break
 		}
 	}
-	return int(new_num)
+	return int(newNum)
 }
 
-func IntToHex(i interface{}) string {
-	hex := fmt.Sprintf("%x", i)
-	if strings.HasPrefix(hex, "0x") {
-		return hex
+func RemoveHexPrefix(str string) string {
+	if HasHexPrefix(str) {
+		return str[2:]
 	}
-	return "0x" + hex
+	return str
 }
