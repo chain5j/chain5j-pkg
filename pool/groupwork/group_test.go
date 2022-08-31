@@ -7,10 +7,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"golang.org/x/sync/errgroup"
 	"runtime"
 	"testing"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 // forever 持续打印数字,直到ctx结束

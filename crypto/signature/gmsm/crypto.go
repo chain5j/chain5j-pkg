@@ -8,10 +8,11 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"hash"
+
 	crypto2 "github.com/chain5j/chain5j-pkg/crypto"
 	"github.com/tjfoc/gmsm/sm2"
 	"github.com/tjfoc/gmsm/sm3"
-	"hash"
 )
 
 var (

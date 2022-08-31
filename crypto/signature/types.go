@@ -17,13 +17,13 @@ type SignResult struct {
 
 // Serialize 获取signResult的bytes
 func (s *SignResult) Serialize() ([]byte, error) {
-	return codec.Coder().Encode(s)
+	return codec.Codecor().Encode(s)
 }
 
 // Deserialize 反解码
 func (s *SignResult) Deserialize(data []byte) error {
 	var sign SignResult
-	err := codec.Coder().Decode(data, &sign)
+	err := codec.Codecor().Decode(data, &sign)
 	if err != nil {
 		return err
 	}

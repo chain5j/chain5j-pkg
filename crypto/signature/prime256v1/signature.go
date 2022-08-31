@@ -326,10 +326,10 @@ func SignCompact(key *PrivateKey, hash []byte, isCompressedKey bool) ([]byte, er
 		if err == nil && pk.X.Cmp(key.X) == 0 && pk.Y.Cmp(key.Y) == 0 {
 			result := make([]byte, 0, 2*curve.Params().BitSize)
 			// 将校验码放在第一位
-			//result[0] = 27 + byte(i)
-			//if isCompressedKey {
+			// result[0] = 27 + byte(i)
+			// if isCompressedKey {
 			//	result[0] += 4
-			//}
+			// }
 			// Not sure this needs rounding but safer to do so.
 			curvelen := (curve.Params().BitSize + 7) / 8
 
@@ -350,10 +350,10 @@ func SignCompact(key *PrivateKey, hash []byte, isCompressedKey bool) ([]byte, er
 
 			// 将校验码放在最后
 			verifyCode := byte(i) // add back recid to get 65 bytes sig
-			//verifyCode := 27 + byte(i)
-			//if isCompressedKey {
+			// verifyCode := 27 + byte(i)
+			// if isCompressedKey {
 			//	verifyCode += 4
-			//}
+			// }
 			result = append(result, verifyCode)
 			return result, nil
 		}
@@ -376,10 +376,10 @@ func RecoverCompact(curve elliptic.Curve, signature, hash []byte) (*PublicKey, b
 
 	// format is <header byte><bitlen R><bitlen S>
 	// 校验码在第一位
-	//sig := &Signature{
+	// sig := &Signature{
 	//	R: new(big.Int).SetBytes(signature[1 : bitlen+1]),
 	//	S: new(big.Int).SetBytes(signature[bitlen+1:]),
-	//}
+	// }
 	// 校验码在最后一位
 	sig := &Signature{
 		curve: curve,

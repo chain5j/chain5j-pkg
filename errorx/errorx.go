@@ -5,6 +5,7 @@ package errorx
 
 import (
 	"fmt"
+
 	"github.com/chain5j/chain5j-pkg/codec/json"
 )
 

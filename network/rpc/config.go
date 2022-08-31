@@ -5,10 +5,11 @@ package rpc
 
 import (
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/util/ioutil"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/chain5j/chain5j-pkg/util/ioutil"
 )
 
 type HttpConfig struct {

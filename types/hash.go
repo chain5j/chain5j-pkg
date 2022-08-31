@@ -7,11 +7,12 @@ import (
 	"database/sql/driver"
 	"encoding/hex"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
-	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"math/big"
 	"math/rand"
 	"reflect"
+
+	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
+	"github.com/chain5j/chain5j-pkg/util/hexutil"
 )
 
 // HashLength hash长度
@@ -23,7 +24,7 @@ var (
 	EmptyCode     = sha3.Keccak256(nil)
 	EmptyCodeHash = BytesToHash(EmptyCode)
 	EmptyRootHash = HexToHash("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421")
-	//EmptyRootHash, _ = hashalg.RootHash(codec.Coder(), nil)
+	// EmptyRootHash, _ = hashalg.RootHash(codec.Codecor(), nil)
 )
 
 type Hash [HashLength]byte
@@ -62,7 +63,7 @@ func (h Hash) HexNoPrefix() string {
 // TerminalString implements log.TerminalStringer, formatting a string for console
 // output during logging.
 func (h Hash) TerminalString() string {
-	//return fmt.Sprintf("%x…%x", h[:3], h[29:])
+	// return fmt.Sprintf("%x…%x", h[:3], h[29:])
 	return h.Hex()
 }
 

@@ -18,8 +18,9 @@ package bls12381
 
 import (
 	"errors"
-	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"math/big"
+
+	"github.com/chain5j/chain5j-pkg/util/hexutil"
 )
 
 func bigFromHex(hex string) *big.Int {

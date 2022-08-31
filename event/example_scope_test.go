@@ -18,9 +18,9 @@ package event_test
 
 import (
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/event"
 	"sync"
 
+	"github.com/chain5j/chain5j-pkg/event"
 )
 
 // This example demonstrates how SubscriptionScope can be used to control the lifetime of

@@ -7,8 +7,9 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"testing"
+
+	"github.com/chain5j/chain5j-pkg/util/hexutil"
 )
 
 type signatureTest struct {
@@ -34,7 +35,7 @@ func decodeHex(hexStr string) []byte {
 }
 
 func testSignCompact(priv *PrivateKey, tag string, data []byte, isCompressed bool) {
-	//priv, _ := GeneratePrivateKey()
+	// priv, _ := GeneratePrivateKey()
 
 	hashed := []byte("testing")
 	sig, err := SignCompact(priv, hashed, isCompressed)
@@ -51,7 +52,7 @@ func testSignCompact(priv *PrivateKey, tag string, data []byte, isCompressed boo
 
 	fmt.Println("签名校验", verify)
 
-	//fmt.Println("签名内容", hexutil.Encode(sig))
+	// fmt.Println("签名内容", hexutil.Encode(sig))
 
 	pk, wasCompressed, err := RecoverCompact(curve, sig, hashed)
 
@@ -110,9 +111,9 @@ func TestSignCompact(t *testing.T) {
 
 	fmt.Println("私钥", priv.D)
 	fmt.Println("公钥", priv.PublicKey)
-	//fmt.Println("地址", crypto.PubkeyToAddress(priv.PublicKey))
+	// fmt.Println("地址", crypto.PubkeyToAddress(priv.PublicKey))
 
-	//for i := 0; i < 256; i++ {
+	// for i := 0; i < 256; i++ {
 	for i := 0; i < 1; i++ {
 		name := fmt.Sprintf("test %d", i)
 		data := make([]byte, 32)

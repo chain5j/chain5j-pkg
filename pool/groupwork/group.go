@@ -6,10 +6,11 @@ package groupwork
 import (
 	"context"
 	"errors"
-	"github.com/chain5j/chain5j-pkg/pool/pool"
-	"github.com/chain5j/logger"
 	"runtime"
 	"sync"
+
+	"github.com/chain5j/chain5j-pkg/pool/pool"
+	"github.com/chain5j/logger"
 )
 
 type Group struct {

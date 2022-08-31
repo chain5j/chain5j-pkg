@@ -1,5 +1,5 @@
 // Package reflectutil
-// 
+//
 // @author: xwc1125
 package reflectutil
 
@@ -19,7 +19,7 @@ func TestToPointer(t *testing.T) {
 		Index: 1,
 	}
 	pointer := ToPointer(aa)
-	fmt.Println("===",pointer)
+	fmt.Println("===", pointer)
 
 	bb := &AA{
 		Name:  "22",

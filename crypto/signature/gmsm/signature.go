@@ -6,6 +6,7 @@ package gmsm
 import (
 	"crypto/ecdsa"
 	"crypto/rand"
+
 	"github.com/tjfoc/gmsm/sm2"
 )
 

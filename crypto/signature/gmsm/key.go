@@ -6,8 +6,9 @@ package gmsm
 import (
 	"crypto/ecdsa"
 	"errors"
-	"github.com/tjfoc/gmsm/sm2"
 	"math/big"
+
+	"github.com/tjfoc/gmsm/sm2"
 )
 
 type PrivateKey sm2.PrivateKey

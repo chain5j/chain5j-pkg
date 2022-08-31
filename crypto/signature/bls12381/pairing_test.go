@@ -1,9 +1,10 @@
 package bls12381
 
 import (
-	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"math/big"
 	"testing"
+
+	"github.com/chain5j/chain5j-pkg/util/hexutil"
 )
 
 func TestPairingExpected(t *testing.T) {

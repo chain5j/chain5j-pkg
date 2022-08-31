@@ -18,7 +18,7 @@ var age = 10 // 参数doc
 
 // 学生表
 type Student struct {
-	Name  string  `chain5j:"stu_name,nil"` //姓名
+	Name  string  `chain5j:"stu_name,nil"` // 姓名
 	Age   int     // 年龄
 	Score float32 // 分数
 	sex   int     // 性别
@@ -89,7 +89,7 @@ func TestDoc(t *testing.T) {
 				// 所有的注释
 				fmt.Println(fmt.Sprintf("Comment Group %d", i))
 				for _, c1 := range c.List {
-					//fmt.Println(fmt.Sprintf("Comment %d: Position: %d, Text: %q", i2, c1.Slash, c1.Text))
+					// fmt.Println(fmt.Sprintf("Comment %d: Position: %d, Text: %q", i2, c1.Slash, c1.Text))
 					fmt.Println(fmt.Sprintf("Text: %q", c1.Text))
 				}
 			}

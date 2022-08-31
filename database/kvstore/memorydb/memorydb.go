@@ -19,11 +19,12 @@ package memorydb
 
 import (
 	"errors"
-	"github.com/chain5j/chain5j-pkg/database/kvstore"
-	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"sort"
 	"strings"
 	"sync"
+
+	"github.com/chain5j/chain5j-pkg/database/kvstore"
+	"github.com/chain5j/chain5j-pkg/util/hexutil"
 )
 
 var (

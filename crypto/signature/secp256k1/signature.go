@@ -7,8 +7,9 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	"github.com/btcsuite/btcd/btcec"
 	"math/big"
+
+	"github.com/btcsuite/btcd/btcec"
 )
 
 var (

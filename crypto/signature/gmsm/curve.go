@@ -5,6 +5,7 @@ package gmsm
 
 import (
 	"crypto/elliptic"
+
 	"github.com/tjfoc/gmsm/sm2"
 )
 

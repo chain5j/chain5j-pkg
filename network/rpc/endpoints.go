@@ -19,9 +19,10 @@ package rpc
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/chain5j/chain5j-pkg/network"
 	"io/ioutil"
 	"net"
+
+	"github.com/chain5j/chain5j-pkg/network"
 )
 
 // StartHTTPEndpoint starts the HTTP RPC endpoint, configured with cors/vhosts/modules

@@ -8,11 +8,12 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
-	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"math/big"
 	"reflect"
 	"strings"
+
+	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
+	"github.com/chain5j/chain5j-pkg/util/hexutil"
 )
 
 const AddressLength = 20

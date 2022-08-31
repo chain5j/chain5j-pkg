@@ -9,8 +9,9 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/math"
 	"math/big"
+
+	"github.com/chain5j/chain5j-pkg/math"
 )
 
 func MarshalPrivateKey(prv *ecdsa.PrivateKey) ([]byte, error) {

@@ -19,6 +19,7 @@ package hexutil_test
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
 )
 

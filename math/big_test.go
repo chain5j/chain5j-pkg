@@ -19,9 +19,10 @@ package math
 import (
 	"bytes"
 	"encoding/hex"
-	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"math/big"
 	"testing"
+
+	"github.com/chain5j/chain5j-pkg/util/hexutil"
 )
 
 func TestHexOrDecimal256(t *testing.T) {

@@ -12,7 +12,7 @@ func GetValue(param interface{}) reflect.Value {
 	return reflect.ValueOf(param)
 }
 
-//GetValues 根据参数获取对应的Values
+// GetValues 根据参数获取对应的Values
 func GetValues(param ...interface{}) []reflect.Value {
 	vals := make([]reflect.Value, 0, len(param))
 	for i := range param {
@@ -27,6 +27,6 @@ func ReflectInterface(funcInter interface{}, paramsValue []reflect.Value) []refl
 		log.Fatal("funcInter is not func")
 	}
 
-	values := v.Call(paramsValue) //方法调用并返回值
+	values := v.Call(paramsValue) // 方法调用并返回值
 	return values
 }
