@@ -18,6 +18,7 @@ package event_test
 
 import (
 	"fmt"
+
 	"github.com/chain5j/chain5j-pkg/event"
 )
 

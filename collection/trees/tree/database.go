@@ -19,15 +19,16 @@ package tree
 import (
 	"errors"
 	"fmt"
+	"io"
+	"reflect"
+	"sync"
+	"time"
+
 	"github.com/VictoriaMetrics/fastcache"
 	"github.com/chain5j/chain5j-pkg/codec/rlp"
 	"github.com/chain5j/chain5j-pkg/database/kvstore"
 	"github.com/chain5j/chain5j-pkg/types"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
-	"io"
-	"reflect"
-	"sync"
-	"time"
 )
 
 // secureKeyPrefix is the database key prefix used to store trie node preimages.

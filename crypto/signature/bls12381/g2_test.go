@@ -3,9 +3,10 @@ package bls12381
 import (
 	"bytes"
 	"crypto/rand"
-	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"math/big"
 	"testing"
+
+	"github.com/chain5j/chain5j-pkg/util/hexutil"
 )
 
 func (g *G2) one() *PointG2 {

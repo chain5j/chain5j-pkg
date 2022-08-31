@@ -14,7 +14,6 @@ func CopyBytes(b []byte) (copiedBytes []byte) {
 	return
 }
 
-
 // RightPadBytes zero-pads slice to the right up to length l.
 func RightPadBytes(slice []byte, l int) []byte {
 	if l <= len(slice) {

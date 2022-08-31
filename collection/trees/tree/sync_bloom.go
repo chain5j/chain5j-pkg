@@ -19,15 +19,16 @@ package tree
 import (
 	"encoding/binary"
 	"fmt"
+	"math"
+	"sync"
+	"sync/atomic"
+	"time"
+
 	"github.com/chain5j/chain5j-pkg/database/kvstore"
 	"github.com/chain5j/chain5j-pkg/types"
 	"github.com/chain5j/chain5j-pkg/util/dateutil"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"github.com/steakknife/bloomfilter"
-	"math"
-	"sync"
-	"sync/atomic"
-	"time"
 )
 
 // syncBloomHasher is a wrapper around a byte blob to satisfy the interface API

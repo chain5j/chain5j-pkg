@@ -1,57 +1,111 @@
-// Package cli
+// Package cli cli命令
 //
 // @author: xwc1125
+// @date: 2020/10/11
 package cli
 
 import (
+	"path/filepath"
+	"sync"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
-// AppInfo app Info
+// AppInfo 应用信息
 type AppInfo struct {
 	App     string `json:"app"`
 	Version string `json:"version"`
 	Welcome string `json:"welcome"`
 }
 
-// LoadConfig load local profile
-// @params configFile config file pat
-// @params key if key=="",load all the config;else load the key config
-// @params result the result must be ptr
-// @params event the file change event
-func LoadConfig(configFile string, key string, result interface{}, event func(e fsnotify.Event)) error {
-	return LoadConfigWithViper(viper.GetViper(), configFile, key, result, event)
-}
+var (
+	eventMapLock sync.Mutex
+	eventMap     = make(map[string][]func(e fsnotify.Event), 0)
+)
 
-// LoadConfigWithViper load config with viper
-func LoadConfigWithViper(_viper *viper.Viper, configFile string, key string, result interface{}, event func(e fsnotify.Event)) error {
-	// init config
+// LoadConfig 加载本地配置文件
+func LoadConfig(configFile string, key string, result interface{}) error {
+	viper := viper.New()
+	// 初始化配置文件
 	if configFile != "" {
-		_viper.SetConfigFile(configFile)
+		viper.SetConfigFile(configFile)
 	} else {
-		_viper.SetConfigName("config")
-		// add config path
-		_viper.AddConfigPath(".")
-		_viper.AddConfigPath("./conf")
+		viper.SetConfigName("config")
+		// 添加读取的配置文件路径
+		viper.AddConfigPath(".")
+		viper.AddConfigPath("./conf")
 	}
-	_viper.AutomaticEnv()
+	viper.AutomaticEnv()
 
-	if err := _viper.ReadInConfig(); err != nil {
+	if err := viper.ReadInConfig(); err != nil {
 		return err
 	}
 	if len(key) == 0 {
-		if err := _viper.Unmarshal(&result); err != nil {
+		if err := viper.Unmarshal(&result); err != nil {
 			return err
 		}
 	} else {
-		if err := _viper.UnmarshalKey(key, &result); err != nil {
+		if err := viper.UnmarshalKey(key, &result); err != nil {
 			return err
 		}
 	}
 
-	_viper.WatchConfig()
-	_viper.OnConfigChange(event)
+	return nil
+}
+func LoadConfigWithEvent(configFile string, key string, result interface{}, event func(e fsnotify.Event)) (err error) {
+	// 初始化配置文件
+	if configFile != "" {
+		configFile, err = filepath.Abs(configFile)
+		if err != nil {
+			return err
+		}
+		viper.SetConfigFile(configFile)
+	} else {
+		viper.SetConfigName("config")
+		// 添加读取的配置文件路径
+		viper.AddConfigPath(".")
+		viper.AddConfigPath("./conf")
+	}
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err != nil {
+		return err
+	}
+	if len(key) == 0 {
+		if err := viper.Unmarshal(&result); err != nil {
+			return err
+		}
+	} else {
+		if err := viper.UnmarshalKey(key, &result); err != nil {
+			return err
+		}
+	}
+	eventMapLock.Lock()
+	configFile = filepath.Clean(configFile)
+	if _, ok := eventMap[configFile]; !ok {
+		viper.WatchConfig()
+	}
+	eventMapLock.Unlock()
+	if event != nil {
+		eventMapLock.Lock()
+		if e, ok := eventMap[configFile]; ok {
+			e = append(e, event)
+			eventMap[configFile] = e
+		} else {
+			eventMap[configFile] = append(eventMap[configFile], event)
+		}
+		eventMapLock.Unlock()
+	}
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		eventMapLock.Lock()
+		if events, ok := eventMap[e.Name]; ok {
+			for _, f := range events {
+				f(e)
+			}
+		}
+		eventMapLock.Unlock()
+	})
 
 	return nil
 }

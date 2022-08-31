@@ -6,12 +6,13 @@ package linkedHashMap
 import (
 	"crypto/rand"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/util/dateutil"
 	"log"
 	"math/big"
 	"strconv"
 	"sync"
 	"testing"
+
+	"github.com/chain5j/chain5j-pkg/util/dateutil"
 )
 
 func TestLinkedHashMap(t *testing.T) {

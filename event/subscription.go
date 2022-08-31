@@ -18,9 +18,10 @@ package event
 
 import (
 	"context"
-	"github.com/chain5j/chain5j-pkg/mclock"
 	"sync"
 	"time"
+
+	"github.com/chain5j/chain5j-pkg/mclock"
 )
 
 // Subscription represents a stream of events. The carrier of the events is typically a

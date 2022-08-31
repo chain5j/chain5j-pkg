@@ -19,8 +19,6 @@ package rpc
 import (
 	"context"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/network"
-	"github.com/chain5j/logger"
 	"math/rand"
 	"net"
 	"net/http"
@@ -31,6 +29,9 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/chain5j/chain5j-pkg/network"
+	"github.com/chain5j/logger"
 
 	"github.com/davecgh/go-spew/spew"
 )

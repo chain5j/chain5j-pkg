@@ -5,8 +5,9 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	crypto2 "github.com/chain5j/chain5j-pkg/crypto"
 	"hash"
+
+	crypto2 "github.com/chain5j/chain5j-pkg/crypto"
 )
 
 // ecdsa: y^2 = x^3 + ax + b

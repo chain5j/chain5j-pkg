@@ -4,9 +4,10 @@
 package reflectutil
 
 import (
-	"github.com/chain5j/logger"
 	"log"
 	"reflect"
+
+	"github.com/chain5j/logger"
 )
 
 // ToPointer 将 interface{T} 转变为 interface{*T}
@@ -16,7 +17,7 @@ func ToPointer(w interface{}) interface{} {
 	if typeOf.Kind() == reflect.Ptr {
 		return w
 	}
-	//reflect.PtrTo(typeOf)
+	// reflect.PtrTo(typeOf)
 	valueOf := reflect.ValueOf(w)
 	pv := reflect.New(typeOf)
 	pv.Elem().Set(valueOf)
@@ -33,7 +34,7 @@ func DelPointer(w interface{}) interface{} {
 }
 
 // GetFieldName structName 的 type 不是结构体类型，就会报以下错误：panic: reflect: NumField of non-struct type，故需要在程序中加以判断。
-//获取结构体中字段的名称
+// 获取结构体中字段的名称
 func GetFieldName(structName interface{}) []string {
 	t := reflect.TypeOf(structName)
 	if t.Kind() == reflect.Ptr {
@@ -64,7 +65,7 @@ func GetValueByFieldName(structName interface{}, fieldName string) interface{} {
 	return fieldByName.Interface()
 }
 
-//获取结构体中Tag的值，如果没有tag则返回字段值
+// 获取结构体中Tag的值，如果没有tag则返回字段值
 func GetTagName(structName interface{}, tagKey string) []FieldInfo {
 	t := reflect.TypeOf(structName)
 	if t.Kind() == reflect.Ptr {

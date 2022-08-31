@@ -19,8 +19,8 @@ func RegisterCodec(_codec Codec) {
 	})
 }
 
-// Coder 获取全局的编解码器
-func Coder() Codec {
+// Codecor 获取全局的编解码器
+func Codecor() Codec {
 	if coder == nil {
 		return DefaultCodec
 	}

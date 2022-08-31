@@ -86,7 +86,7 @@ func ParsePubKey(curve elliptic.Curve, pubKeyStr []byte) (key *PublicKey, err er
 	case PubKeyBytesLenCompressed:
 		// format is 0x2 | solution, <X coordinate>
 		// solution determines which solution of the curve we use.
-		/// y^2 = x^3 + a*x + Curve.B
+		// / y^2 = x^3 + a*x + Curve.B
 		if format != pubkeyCompressed {
 			return nil, fmt.Errorf("invalid magic in compressed "+
 				"pubkey string: %d", pubKeyStr[0])

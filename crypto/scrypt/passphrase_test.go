@@ -14,7 +14,7 @@ const (
 func TestEncryptKey(t *testing.T) {
 	prvKey, _ := hex.DecodeString("587ca4a15bc4d239cfba433dda03366506e99ecd2c529216eb3168b3e7806257")
 	k := &Key{
-		//Address:    addr,
+		// Address:    addr,
 		PrivateKey: prvKey,
 	}
 	keyJson, err := EncryptKey(k, "123456", veryLightScryptN, veryLightScryptP)

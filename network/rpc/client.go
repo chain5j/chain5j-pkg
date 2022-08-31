@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/network"
 	"net"
 	"net/url"
 	"os"
@@ -33,6 +32,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/chain5j/chain5j-pkg/network"
 )
 
 var (

@@ -8,11 +8,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/codec/rlp"
-	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"io"
 	"math/big"
 	"strings"
+
+	"github.com/chain5j/chain5j-pkg/codec/rlp"
+	"github.com/chain5j/chain5j-pkg/util/hexutil"
 )
 
 var (

@@ -4,9 +4,10 @@
 package lookup
 
 import (
-	"github.com/allegro/bigcache/v2"
 	"sync"
 	"time"
+
+	"github.com/allegro/bigcache/v2"
 )
 
 type Lookup struct {
@@ -24,7 +25,7 @@ func NewLookup(txConfig *PoolConfig, OnRemoveWithReason func(key string, entry [
 }
 
 func getCacheConfig(txConfig *PoolConfig, OnRemoveWithReason func(key string, entry []byte, reason bigcache.RemoveReason)) bigcache.Config {
-	//bigcache.DefaultConfig(10 * time.Minute)
+	// bigcache.DefaultConfig(10 * time.Minute)
 	config := bigcache.Config{
 		// number of shards (must be a power of 2)
 		Shards: 16384,
@@ -35,7 +36,7 @@ func getCacheConfig(txConfig *PoolConfig, OnRemoveWithReason func(key string, en
 		// Interval between removing expired entries (clean up).
 		// If set to <= 0 then no action is performed.
 		// Setting to < 1 second is counterproductive — bigcache has a one second resolution.
-		//CleanWindow: 5 * time.Minute,
+		// CleanWindow: 5 * time.Minute,
 		CleanWindow: txConfig.TxTaskTime * time.Second,
 
 		// rps * lifeWindow, used only in initial memory allocation
@@ -73,8 +74,8 @@ func (tl *Lookup) Len() uint64 {
 }
 
 func (tl *Lookup) Exist(hash string) bool {
-	//tl.mu.RLock()
-	//defer tl.mu.RUnlock()
+	// tl.mu.RLock()
+	// defer tl.mu.RUnlock()
 	_, err := tl.cache.Get(hash)
 	if err != nil {
 		return false
@@ -82,8 +83,8 @@ func (tl *Lookup) Exist(hash string) bool {
 	return true
 }
 func (tl *Lookup) Get(hash string) ([]byte, error) {
-	//tl.mu.RLock()
-	//defer tl.mu.RUnlock()
+	// tl.mu.RLock()
+	// defer tl.mu.RUnlock()
 	return tl.cache.Get(hash)
 }
 

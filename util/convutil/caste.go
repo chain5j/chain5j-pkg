@@ -1,6 +1,7 @@
 package convutil
 
 import (
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -474,6 +475,8 @@ func ToUintE(i interface{}) (uint, error) {
 		return 0, nil
 	case nil:
 		return 0, nil
+	case []byte:
+		return uint(binary.BigEndian.Uint64(s)), nil
 	default:
 		return 0, fmt.Errorf("unable to cast %#v of type %T to uint", i, i)
 	}
@@ -542,6 +545,8 @@ func ToUint64E(i interface{}) (uint64, error) {
 		return 0, nil
 	case nil:
 		return 0, nil
+	case []byte:
+		return binary.BigEndian.Uint64(s), nil
 	default:
 		return 0, fmt.Errorf("unable to cast %#v of type %T to uint64", i, i)
 	}
@@ -610,6 +615,8 @@ func ToUint32E(i interface{}) (uint32, error) {
 		return 0, nil
 	case nil:
 		return 0, nil
+	case []byte:
+		return binary.BigEndian.Uint32(s), nil
 	default:
 		return 0, fmt.Errorf("unable to cast %#v of type %T to uint32", i, i)
 	}
@@ -678,6 +685,8 @@ func ToUint16E(i interface{}) (uint16, error) {
 		return 0, nil
 	case nil:
 		return 0, nil
+	case []byte:
+		return binary.BigEndian.Uint16(s), nil
 	default:
 		return 0, fmt.Errorf("unable to cast %#v of type %T to uint16", i, i)
 	}
@@ -746,6 +755,8 @@ func ToUint8E(i interface{}) (uint8, error) {
 		return 0, nil
 	case nil:
 		return 0, nil
+	case []byte:
+		return uint8(binary.BigEndian.Uint64(s)), nil
 	default:
 		return 0, fmt.Errorf("unable to cast %#v of type %T to uint8", i, i)
 	}

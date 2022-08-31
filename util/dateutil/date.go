@@ -1,10 +1,9 @@
 package dateutil
 
 import (
-	"fmt"
-	"github.com/chain5j/logger"
-	"strings"
 	"time"
+
+	"github.com/chain5j/logger"
 )
 
 /*
@@ -23,8 +22,8 @@ import (
 */
 type DateFormat string
 
-// 时间格式化字符串
 const (
+	// 时间格式化字符串
 	Default               DateFormat = "2006-01-02 15:04:05"
 	YYYY                  DateFormat = "2006"
 	YYYY_MM               DateFormat = "2006-01"
@@ -55,12 +54,17 @@ var SysTimeLocation, _ = time.LoadLocation("Asia/Chongqing")
 
 // CurrentTime 返回毫秒
 func CurrentTime() int64 {
-	return time.Now().UnixMilli()
+	return time.Now().UnixNano() / 1e6
 }
 
 // CurrentTimeSecond 返回秒
 func CurrentTimeSecond() int64 {
 	return time.Now().Unix()
+}
+
+// CurrentTimeDay 返回day的时间戳
+func CurrentTimeDay() int64 {
+	return time.Now().UnixNano() / Day.Nanoseconds()
 }
 
 // NanoToMillisecond 纳秒转毫秒
@@ -73,32 +77,29 @@ func NanoToSecond(t int64) int64 {
 	return t / 1e9
 }
 
-// SecondToTime 秒转time
+// 秒转time
 func SecondToTime(t int64) time.Time {
 	return time.Unix(t, 0)
 }
 
-// MillisecondToTime 毫秒转time
 func MillisecondToTime(t int64) time.Time {
-	return time.UnixMilli(t)
+	return time.Unix(0, t*1e6)
 }
-
-// NanoToTime 纳秒转time
 func NanoToTime(t int64) time.Time {
 	return time.Unix(0, t)
 }
 
-// Format 格式化输出
+// 格式化输出
 func Format(t time.Time, format DateFormat) string {
 	return t.Format(format.String())
 }
 
-// SecondFormat 秒转成format
+// 秒转成format
 func SecondFormat(t int64, format DateFormat) string {
 	return Format(SecondToTime(t), format)
 }
 
-// ParseInLocation 时间转本地化
+// 时间转本地化
 // s时间格式：如"2017-05-11 14:06:06"
 // format：格式
 // location：时区(Location)
@@ -107,18 +108,17 @@ func ParseInLocation(s string, format DateFormat, location *time.Location) {
 	time.ParseInLocation(format.String(), s, location)
 }
 
-// LoadLocation 获取location
 func LoadLocation(loc string) *time.Location {
 	// 默认UTC
-	//loc, err := time.LoadLocation("")
-	//// 服务器设定的时区，一般为CST
-	//loc, err := time.LoadLocation("Local")
-	//// 美国洛杉矶PDT
-	//loc, err := time.LoadLocation("America/Los_Angeles")
+	// loc, err := time.LoadLocation("")
+	// // 服务器设定的时区，一般为CST
+	// loc, err := time.LoadLocation("Local")
+	// // 美国洛杉矶PDT
+	// loc, err := time.LoadLocation("America/Los_Angeles")
 	//
-	//// 获取指定时区的时间点
-	//local, _ := time.LoadLocation("America/Los_Angeles")
-	//fmt.Println(time.Date(2018,1,1,12,0,0,0, local))
+	// // 获取指定时区的时间点
+	// local, _ := time.LoadLocation("America/Los_Angeles")
+	// fmt.Println(time.Date(2018,1,1,12,0,0,0, local))
 	location, e := time.LoadLocation(loc)
 	if e != nil {
 		logger.Error("loadLocation err", "err", e)
@@ -126,57 +126,4 @@ func LoadLocation(loc string) *time.Location {
 		return location
 	}
 	return location
-}
-
-// GetDistanceTime 获取间隔时间错，传入的是毫秒
-func GetDistanceTime(diffMS int64) string {
-	isNegative := false
-	if diffMS < 0 {
-		isNegative = true
-		diffMS = -diffMS
-	}
-	s := diffMS / 1000 // 秒
-	m := s / 60        //分钟
-	h := m / 60        //小时
-	day := h / 24      //天
-	hour := h - 24*day
-	min := m - h*60
-	sec := s - m*60
-	ms := diffMS - s*1000
-	var buff strings.Builder
-	if isNegative {
-		buff.WriteString("-")
-	}
-	if day > 0 {
-		buff.WriteString(fmt.Sprintf("%dd", day))
-	}
-	if hour > 0 {
-		buff.WriteString(fmt.Sprintf("%dh", hour))
-	}
-	if min > 0 {
-		buff.WriteString(fmt.Sprintf("%dm", min))
-	}
-	if sec > 0 {
-		buff.WriteString(fmt.Sprintf("%ds", sec))
-	}
-	if ms > 0 {
-		buff.WriteString(fmt.Sprintf("%dms", ms))
-	}
-	return buff.String()
-}
-
-// GetDistanceTimeToCurrent 传入的是毫秒值
-func GetDistanceTimeToCurrent(startTime int64) string {
-	diff := CurrentTime() - startTime
-	return GetDistanceTime(diff)
-}
-
-// GetAddDayTime 添加天数
-// 如果day是负数,那么是往前算
-func GetAddDayTime(day int) (days int64) {
-	//获取两天前的时间
-	currentTime := time.Now()
-	oldTime := currentTime.AddDate(0, 0, day)
-	startTime := time.Date(oldTime.Year(), oldTime.Month(), oldTime.Day(), 0, 0, 0, 0, oldTime.Location())
-	return startTime.UnixNano()
 }

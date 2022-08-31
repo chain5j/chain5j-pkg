@@ -8,6 +8,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"math/big"
+	"os"
+	"strings"
+
 	"github.com/chain5j/chain5j-pkg/crypto"
 	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
 	"github.com/chain5j/chain5j-pkg/crypto/signature/gmsm"
@@ -15,11 +21,6 @@ import (
 	"github.com/chain5j/chain5j-pkg/crypto/signature/secp256k1"
 	"github.com/chain5j/chain5j-pkg/math"
 	"github.com/chain5j/chain5j-pkg/types"
-	"io"
-	"io/ioutil"
-	"math/big"
-	"os"
-	"strings"
 )
 
 var (

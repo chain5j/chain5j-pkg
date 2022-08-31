@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/network"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -31,6 +30,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/chain5j/chain5j-pkg/network"
 
 	"github.com/rs/cors"
 )

@@ -1,16 +1,17 @@
 module github.com/chain5j/chain5j-pkg
 
-go 1.17
+go 1.18
 
 require (
 	github.com/VictoriaMetrics/fastcache v1.5.7
 	github.com/allegro/bigcache/v2 v2.2.4
 	github.com/aristanetworks/goarista v0.0.0-20200812190859-4cb0e71f3c0e
 	github.com/btcsuite/btcd v0.21.0-beta
-	github.com/chain5j/logger v0.0.2
+	github.com/chain5j/logger v1.0.3
 	github.com/davecgh/go-spew v1.1.1
 	github.com/deckarep/golang-set v1.7.1
 	github.com/fsnotify/fsnotify v1.4.9
+	github.com/jinzhu/copier v0.3.5
 	github.com/json-iterator/go v1.1.9
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/panjf2000/ants/v2 v2.4.6
@@ -23,14 +24,18 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/syndtr/goleveldb v1.0.1-0.20190923125748-758128399b1d
 	github.com/tjfoc/gmsm v1.4.0
-	golang.org/x/crypto v0.0.0-20201012173705-84dcc777aaee
-	golang.org/x/net v0.0.0-20201010224723-4f7140c49acb
-	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e
-	golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+	golang.org/x/exp v0.0.0-20220827204233-334a2380cb91
+	golang.org/x/net v0.0.0-20220722155237-a158d28d115b
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
+	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f
+	golang.org/x/tools v0.1.12
 )
 
 require (
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
+	github.com/chain5j/log15 v1.0.12 // indirect
+	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.0.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -48,7 +53,8 @@ require (
 	github.com/spf13/jwalterweatherman v1.0.0 // indirect
 	github.com/steakknife/hamming v0.0.0-20180906055917-c99c65617cd3 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
-	golang.org/x/text v0.3.3 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
+	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/ini.v1 v1.51.0 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect

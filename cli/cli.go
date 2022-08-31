@@ -5,6 +5,8 @@ package cli
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -78,7 +80,9 @@ func (cli *Cli) InitFlags(useDefaultFlags bool, flagSetFunc func(rootFlags *pfla
 			flagSetFunc(rootFlags)
 		}
 		// 将完整的命令绑定到viper上
-		cli.viper.BindPFlags(rootFlags)
+		if err := cli.viper.BindPFlags(rootFlags); err != nil {
+			return err
+		}
 	}
 
 	// 进行config初始化
@@ -86,6 +90,10 @@ func (cli *Cli) InitFlags(useDefaultFlags bool, flagSetFunc func(rootFlags *pfla
 		if useDefaultFlags {
 			// 初始化配置文件
 			if cli.configFile != "" {
+				cli.configFile, err = filepath.Abs(cli.configFile)
+				if err != nil {
+					return
+				}
 				cli.viper.SetConfigFile(cli.configFile)
 			} else {
 				// 如果含有环境类型，那么使用config_{env}

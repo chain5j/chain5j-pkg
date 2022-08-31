@@ -20,17 +20,18 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/codec/rlp"
-	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
-	"github.com/chain5j/chain5j-pkg/database/kvstore/memorydb"
-	"github.com/chain5j/chain5j-pkg/types"
-	"github.com/davecgh/go-spew/spew"
 	"io/ioutil"
 	"math/big"
 	"math/rand"
 	"reflect"
 	"testing"
 	"testing/quick"
+
+	"github.com/chain5j/chain5j-pkg/codec/rlp"
+	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
+	"github.com/chain5j/chain5j-pkg/database/kvstore/memorydb"
+	"github.com/chain5j/chain5j-pkg/types"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func init() {
@@ -460,7 +461,7 @@ func benchGet(b *testing.B, commit bool) {
 	if commit {
 		ldb := trie.db.diskdb.(*memorydb.Database)
 		ldb.Close()
-		//os.RemoveAll(ldb.Path())
+		// os.RemoveAll(ldb.Path())
 	}
 }
 

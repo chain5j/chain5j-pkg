@@ -5,6 +5,7 @@ package secp256k1
 
 import (
 	"crypto/elliptic"
+
 	"github.com/btcsuite/btcd/btcec"
 )
 

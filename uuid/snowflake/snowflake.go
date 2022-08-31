@@ -1,5 +1,5 @@
 // Package snowflake
-// 
+//
 // @author: xwc1125
 package snowflake
 

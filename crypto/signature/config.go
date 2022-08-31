@@ -5,6 +5,7 @@ package signature
 
 import (
 	"crypto/elliptic"
+
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/chain5j/logger"
 	"github.com/tjfoc/gmsm/sm2"

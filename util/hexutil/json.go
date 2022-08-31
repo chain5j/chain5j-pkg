@@ -77,7 +77,7 @@ func (b Bytes) Bytes() []byte {
 }
 
 func (b Bytes) Nil() bool {
-	if b==nil {
+	if b == nil {
 		return true
 	}
 	return false

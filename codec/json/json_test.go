@@ -52,8 +52,7 @@ func TestBigIntCodec(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	tmp2 := &tmpst{
-	}
+	tmp2 := &tmpst{}
 
 	b2, err := Marshal(tmp2)
 	if err != nil {

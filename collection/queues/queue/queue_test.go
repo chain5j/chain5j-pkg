@@ -4,8 +4,9 @@
 package queue
 
 import (
-	"github.com/davecgh/go-spew/spew"
 	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 type item struct {
@@ -81,7 +82,7 @@ func TestDel(t *testing.T) {
 	queue.PushFront("3")
 	queue.PollFront()
 	queue.PollBack()
-	//queue.Remove("1")
+	// queue.Remove("1")
 	queue.Remove("3")
 	queue.Remove("2")
 

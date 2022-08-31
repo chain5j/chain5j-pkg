@@ -4,15 +4,16 @@
 package hashmap
 
 import (
+	"io"
+	"math/big"
+	"reflect"
+
 	"github.com/chain5j/chain5j-pkg/codec/rlp"
 	"github.com/chain5j/chain5j-pkg/math"
 	"github.com/chain5j/chain5j-pkg/types"
 	"github.com/chain5j/chain5j-pkg/util/convutil"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"github.com/mitchellh/mapstructure"
-	"io"
-	"math/big"
-	"reflect"
 )
 
 func (m *HashMap) EncodeRLP(w io.Writer) error {
@@ -60,7 +61,7 @@ func StringToByteSizesHookFunc(
 	data interface{}) (interface{}, error) {
 	dataVal := reflect.Indirect(reflect.ValueOf(data))
 	dataKind := getKind(dataVal)
-	//dataType := dataVal.Type()
+	// dataType := dataVal.Type()
 	desKind := getKindByKind(des.Kind())
 
 	switch {

@@ -7,6 +7,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"errors"
+
 	"github.com/btcsuite/btcd/btcec"
 )
 
@@ -22,7 +23,7 @@ func MarshalPrivateKey(key *ecdsa.PrivateKey) ([]byte, error) {
 	return privateKey.Serialize(), nil
 }
 
-func UnmarshalPrivateKey(curve elliptic.Curve,data []byte) (*ecdsa.PrivateKey, error) {
+func UnmarshalPrivateKey(curve elliptic.Curve, data []byte) (*ecdsa.PrivateKey, error) {
 	privateKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), data)
 	if privateKey != nil {
 		return privateKey.ToECDSA(), nil
@@ -61,7 +62,7 @@ func MarshalPrivateKeyX509(key *ecdsa.PrivateKey) ([]byte, error) {
 	return privateKey.Serialize(), nil
 }
 
-func UnmarshalPrivateKeyX509(curve elliptic.Curve,data []byte) (*ecdsa.PrivateKey, error) {
+func UnmarshalPrivateKeyX509(curve elliptic.Curve, data []byte) (*ecdsa.PrivateKey, error) {
 	privateKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), data)
 	if privateKey != nil {
 		return privateKey.ToECDSA(), nil

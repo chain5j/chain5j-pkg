@@ -26,12 +26,12 @@ func (srv *Server) ServeListener(l net.Listener) error {
 	for {
 		conn, err := l.Accept()
 		// TODO
-		//if netutil.IsTemporaryError(err) {
+		// if netutil.IsTemporaryError(err) {
 		//	log.Warn("RPC accept error", "err", err)
 		//	continue
-		//} else if err != nil {
+		// } else if err != nil {
 		//	return err
-		//}
+		// }
 		if err != nil {
 			return err
 		}

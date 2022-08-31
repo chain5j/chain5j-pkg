@@ -5,23 +5,24 @@ package hashmap
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/chain5j/chain5j-pkg/codec"
 	"github.com/chain5j/chain5j-pkg/math"
 	"github.com/chain5j/chain5j-pkg/util/convutil"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"github.com/mitchellh/mapstructure"
-	"testing"
 )
 
 func TestConvert(t *testing.T) {
-	//int8: -128 ~ 127
-	//int16: -32768 ~ 32767
-	//int32: -2147483648 ~ 2147483647
-	//int64: -9223372036854775808 ~ 9223372036854775807
-	//uint8: 0 ~ 255
-	//uint16: 0 ~ 65535
-	//uint32: 0 ~ 4294967295
-	//uint64: 0 ~ 18446744073709551615
+	// int8: -128 ~ 127
+	// int16: -32768 ~ 32767
+	// int32: -2147483648 ~ 2147483647
+	// int64: -9223372036854775808 ~ 9223372036854775807
+	// uint8: 0 ~ 255
+	// uint16: 0 ~ 65535
+	// uint32: 0 ~ 4294967295
+	// uint64: 0 ~ 18446744073709551615
 	hashMap := NewHashMap(true)
 	hashMap.Put("int_0", 0)
 	hashMap.Put("int_1", 1)
@@ -38,15 +39,15 @@ func TestConvert(t *testing.T) {
 	hashMap.Put("uint8_MaxUint8", math.MaxUint8)
 	hashMap.Put("uint16_MaxUint16", math.MaxUint16)
 	hashMap.Put("uint32_MaxUint32", math.MaxUint32)
-	//hashMap.Put("uint64_1", math.MaxUint64)
+	// hashMap.Put("uint64_1", math.MaxUint64)
 
 	hashMap.Put("show", true)
 
-	if bytes, err := codec.Coder().Encode(hashMap); err != nil {
+	if bytes, err := codec.Codecor().Encode(hashMap); err != nil {
 		t.Fatal(err)
 	} else {
 		newHashMap := NewHashMap(true)
-		if err := codec.Coder().Decode(bytes, newHashMap); err != nil {
+		if err := codec.Codecor().Decode(bytes, newHashMap); err != nil {
 			t.Fatal(err)
 		}
 		for k, v := range newHashMap.data {
@@ -108,11 +109,11 @@ func TestRlp(t *testing.T) {
 		"QmVy5JASWLUns3Wwe91arP93rPPumkEQ7fQZ4GfpevxKbd",
 		"QmafFDAXGtW1M2zhsiYPxUtpkYjAgBUpPDPQZRkhgonGrT",
 	})
-	if bytes, err := codec.Coder().Encode(hashMap); err != nil {
+	if bytes, err := codec.Codecor().Encode(hashMap); err != nil {
 		t.Fatal(err)
 	} else {
 		newHashMap := NewHashMap(true)
-		if err := codec.Coder().Decode(bytes, newHashMap); err != nil {
+		if err := codec.Codecor().Decode(bytes, newHashMap); err != nil {
 			t.Fatal(err)
 		}
 		t.Logf("%v", newHashMap)
