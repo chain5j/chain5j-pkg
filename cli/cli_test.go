@@ -4,10 +4,11 @@
 package cli
 
 import (
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
 	"os"
 	"testing"
+
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 )
 
 func TestNewCli(t *testing.T) {
@@ -25,7 +26,7 @@ func TestNewCli(t *testing.T) {
 		return
 	}
 
-	//rootCli.AddCommand(GenesisCommand)
+	// rootCli.AddCommand(GenesisCommand)
 
 	rootCli.Execute()
 }
@@ -61,7 +62,7 @@ func TestNewCliNoDefault(t *testing.T) {
 		return
 	}
 
-	//rootCli.AddCommand(GenesisCommand)
+	// rootCli.AddCommand(GenesisCommand)
 
 	rootCli.Execute()
 }
