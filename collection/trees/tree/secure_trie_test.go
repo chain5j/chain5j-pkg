@@ -18,13 +18,14 @@ package tree
 
 import (
 	"bytes"
+	"runtime"
+	"sync"
+	"testing"
+
 	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
 	"github.com/chain5j/chain5j-pkg/database/kvstore/memorydb"
 	"github.com/chain5j/chain5j-pkg/types"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
-	"runtime"
-	"sync"
-	"testing"
 )
 
 func newEmptySecure() *SecureTrie {

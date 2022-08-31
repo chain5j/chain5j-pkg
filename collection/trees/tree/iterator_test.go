@@ -19,11 +19,12 @@ package tree
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
+	"testing"
+
 	"github.com/chain5j/chain5j-pkg/database/kvstore/memorydb"
 	"github.com/chain5j/chain5j-pkg/types"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
-	"math/rand"
-	"testing"
 )
 
 func TestIterator(t *testing.T) {

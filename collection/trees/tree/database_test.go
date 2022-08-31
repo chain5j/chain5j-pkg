@@ -17,9 +17,10 @@
 package tree
 
 import (
+	"testing"
+
 	"github.com/chain5j/chain5j-pkg/database/kvstore/memorydb"
 	"github.com/chain5j/chain5j-pkg/types"
-	"testing"
 )
 
 // Tests that the trie database returns a missing trie node error if attempting

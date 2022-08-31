@@ -18,6 +18,7 @@ package tree
 
 import (
 	"fmt"
+
 	"github.com/chain5j/chain5j-pkg/types"
 )
 
@@ -26,7 +27,7 @@ import (
 // information necessary for retrieving the missing node.
 type MissingNodeError struct {
 	NodeHash types.Hash // hash of the missing node
-	Path     []byte      // hex-encoded path to the missing node
+	Path     []byte     // hex-encoded path to the missing node
 }
 
 func (err *MissingNodeError) Error() string {

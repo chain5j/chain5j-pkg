@@ -5,8 +5,9 @@ package linkedHashMap
 
 import (
 	"container/list"
-	"github.com/chain5j/logger"
 	"sync"
+
+	"github.com/chain5j/logger"
 )
 
 type Node struct {

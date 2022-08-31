@@ -6,11 +6,12 @@ package hashmap
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/chain5j/chain5j-pkg/codec"
-	"github.com/chain5j/chain5j-pkg/util/reflectutil"
 	"reflect"
 	"sort"
 	"sync"
+
+	"github.com/chain5j/chain5j-pkg/codec"
+	"github.com/chain5j/chain5j-pkg/util/reflectutil"
 )
 
 // HashMap ...
@@ -52,8 +53,8 @@ func NewHashMapSame(isSafe bool, val interface{}) *HashMap {
 func NewHashMapFill(val interface{}) *HashMap {
 	valueOf := reflect.ValueOf(val)
 	if valueOf.Kind() == reflect.Map {
-		//elem := valueOf.Elem()
-		//fmt.Println(elem)
+		// elem := valueOf.Elem()
+		// fmt.Println(elem)
 		_, err := Get(val, []interface{}{})
 		if err != nil {
 			fmt.Println(err)
@@ -292,5 +293,5 @@ func (m *HashMap) UnmarshalJSON(bytes []byte) error {
 }
 
 func (m *HashMap) Decode(data []byte) error {
-	return codec.Coder().Decode(data, &m)
+	return codec.Codecor().Decode(data, &m)
 }

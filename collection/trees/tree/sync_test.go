@@ -18,10 +18,11 @@ package tree
 
 import (
 	"bytes"
+	"testing"
+
 	"github.com/chain5j/chain5j-pkg/database/kvstore/memorydb"
 	"github.com/chain5j/chain5j-pkg/types"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
-	"testing"
 )
 
 // makeTestTrie create a sample test trie to test node-wise reconstruction.
