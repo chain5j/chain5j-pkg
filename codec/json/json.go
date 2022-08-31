@@ -1,12 +1,13 @@
 package json
 
 import (
-	"github.com/chain5j/chain5j-pkg/util/hexutil"
-	"github.com/json-iterator/go"
 	"io"
 	"math/big"
 	"strings"
 	"unsafe"
+
+	"github.com/chain5j/chain5j-pkg/util/hexutil"
+	"github.com/json-iterator/go"
 )
 
 func init() {
