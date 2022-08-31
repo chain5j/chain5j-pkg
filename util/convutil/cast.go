@@ -1,6 +1,9 @@
 package convutil
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // ToBool casts an interface to a bool type.
 func ToBool(i interface{}) bool {
@@ -162,4 +165,57 @@ func ToIntSlice(i interface{}) []int {
 func ToDurationSlice(i interface{}) []time.Duration {
 	v, _ := ToDurationSliceE(i)
 	return v
+}
+
+func ToInterface(typeStr string, s string) (interface{}, error) {
+	switch typeStr {
+	case "string":
+		return s, nil
+	case "int":
+		return ToIntE(s)
+	case "int8":
+		return ToInt8E(s)
+	case "int16":
+		return ToInt16E(s)
+	case "int32":
+		return ToInt32E(s)
+	case "int64":
+		return ToInt64E(s)
+	case "uint":
+		return ToUintE(s)
+	case "uint8":
+		return ToUint8E(s)
+	case "uint16":
+		return ToUint16E(s)
+	case "uint32":
+		return ToUint32E(s)
+	case "uint64":
+		return ToUint64E(s)
+	case "float32":
+		return ToFloat32E(s)
+	case "float64":
+		return ToFloat64E(s)
+	case "bool":
+		return ToBoolE(s)
+	case "slice":
+		return ToSliceE(s)
+	case "map[string]interface{}":
+		return ToStringMapE(s)
+	case "map[string]string":
+		return ToStringMapStringE(s)
+	case "map[string]int":
+		return ToStringMapIntE(s)
+	case "map[string]int64":
+		return ToStringMapInt64E(s)
+	case "map[string]bool":
+		return ToStringMapBoolE(s)
+	case "[]string":
+		return ToStringSliceE(s)
+	case "[]int":
+		return ToIntSliceE(s)
+	case "[]bool":
+		return ToBoolSliceE(s)
+	default:
+		return nil, fmt.Errorf("unsupprot the type:%s", typeStr)
+	}
 }
