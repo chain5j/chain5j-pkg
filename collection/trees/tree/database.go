@@ -46,7 +46,7 @@ const secureKeyLength = 11 + 32
 // behind this split design is to provide read access to RPC handlers and sync
 // servers even while the trie is executing expensive garbage collection.
 type Database struct {
-	diskdb kvstore.Database // Persistent storage for matured trie nodes
+	diskdb kvstore.KeyValueStore // Persistent storage for matured trie nodes
 
 	cleans  *fastcache.Cache           // GC friendly memory cache of clean node RLPs
 	dirties map[types.Hash]*cachedNode // Data and references relationships of dirty nodes
@@ -254,14 +254,14 @@ func expandNode(hash hashNode, n node) node {
 // NewDatabase creates a new trie database to store ephemeral trie content before
 // its written out to disk or garbage collected. No read cache is created, so all
 // data retrievals will hit the underlying disk database.
-func NewDatabase(diskdb kvstore.Database) *Database {
+func NewDatabase(diskdb kvstore.KeyValueStore) *Database {
 	return NewDatabaseWithCache(diskdb, 0)
 }
 
 // NewDatabaseWithCache creates a new trie database to store ephemeral trie content
 // before its written out to disk or garbage collected. It also acts as a read cache
 // for nodes loaded from disk.
-func NewDatabaseWithCache(diskdb kvstore.Database, cache int) *Database {
+func NewDatabaseWithCache(diskdb kvstore.KeyValueStore, cache int) *Database {
 	var cleans *fastcache.Cache
 	if cache > 0 {
 		cleans = fastcache.New(cache * 1024 * 1024)
@@ -278,7 +278,7 @@ func NewDatabaseWithCache(diskdb kvstore.Database, cache int) *Database {
 }
 
 // DiskDB retrieves the persistent storage backing the trie database.
-func (db *Database) DiskDB() kvstore.KeyValueReader {
+func (db *Database) DiskDB() kvstore.KeyValueStore {
 	return db.diskdb
 }
 
@@ -471,7 +471,7 @@ func (db *Database) reference(child types.Hash, parent types.Hash) {
 func (db *Database) Dereference(root types.Hash) {
 	// Sanity check to ensure that the meta-root is not removed
 	if root == (types.Hash{}) {
-		log().Error("Attempted to dereference the trie cache meta root")
+		logger().Error("Attempted to dereference the trie cache meta root")
 		return
 	}
 	db.lock.Lock()
@@ -484,7 +484,7 @@ func (db *Database) Dereference(root types.Hash) {
 	db.gcsize += storage - db.dirtiesSize
 	db.gctime += time.Since(start)
 
-	log().Debug("Dereferenced trie from memory database", "nodes", nodes-len(db.dirties), "size", storage-db.dirtiesSize, "time", time.Since(start),
+	logger().Debug("Dereferenced trie from memory database", "nodes", nodes-len(db.dirties), "size", storage-db.dirtiesSize, "time", time.Since(start),
 		"gcnodes", db.gcnodes, "gcsize", db.gcsize, "gctime", db.gctime, "livenodes", len(db.dirties), "livesize", db.dirtiesSize)
 }
 
@@ -563,7 +563,7 @@ func (db *Database) Cap(limit types.StorageSize) error {
 	if flushPreimages {
 		for hash, preimage := range db.preimages {
 			if err := batch.Put(db.secureKey(hash[:]), preimage); err != nil {
-				log().Error("Failed to commit preimage from trie database", "err", err)
+				logger().Error("Failed to commit preimage from trie database", "err", err)
 				return err
 			}
 			if batch.ValueSize() > kvstore.IdealBatchSize {
@@ -585,7 +585,7 @@ func (db *Database) Cap(limit types.StorageSize) error {
 		// If we exceeded the ideal batch size, commit and reset
 		if batch.ValueSize() >= kvstore.IdealBatchSize {
 			if err := batch.Write(); err != nil {
-				log().Error("Failed to write flush list to disk", "err", err)
+				logger().Error("Failed to write flush list to disk", "err", err)
 				return err
 			}
 			batch.Reset()
@@ -601,7 +601,7 @@ func (db *Database) Cap(limit types.StorageSize) error {
 	}
 	// Flush out any remainder data from the last batch
 	if err := batch.Write(); err != nil {
-		log().Error("Failed to write flush list to disk", "err", err)
+		logger().Error("Failed to write flush list to disk", "err", err)
 		return err
 	}
 	// Write successful, clear out the flushed data
@@ -629,7 +629,7 @@ func (db *Database) Cap(limit types.StorageSize) error {
 	db.flushsize += storage - db.dirtiesSize
 	db.flushtime += time.Since(start)
 
-	log().Debug("Persisted nodes from memory database", "nodes", nodes-len(db.dirties), "size", storage-db.dirtiesSize, "time", time.Since(start),
+	logger().Debug("Persisted nodes from memory database", "nodes", nodes-len(db.dirties), "size", storage-db.dirtiesSize, "time", time.Since(start),
 		"flushnodes", db.flushnodes, "flushsize", db.flushsize, "flushtime", db.flushtime, "livenodes", len(db.dirties), "livesize", db.dirtiesSize)
 
 	return nil
@@ -652,7 +652,7 @@ func (db *Database) Commit(node types.Hash, report bool) error {
 	// Move all of the accumulated preimages into a write batch
 	for hash, preimage := range db.preimages {
 		if err := batch.Put(db.secureKey(hash[:]), preimage); err != nil {
-			log().Error("Failed to commit preimage from trie database", "err", err)
+			logger().Error("Failed to commit preimage from trie database", "err", err)
 			return err
 		}
 		// If the batch is too large, flush to disk
@@ -675,12 +675,12 @@ func (db *Database) Commit(node types.Hash, report bool) error {
 
 	uncacher := &cleaner{db}
 	if err := db.commit(node, batch, uncacher); err != nil {
-		log().Error("Failed to commit trie from trie database", "err", err)
+		logger().Error("Failed to commit trie from trie database", "err", err)
 		return err
 	}
 	// Trie mostly committed to disk, flush any batch leftovers
 	if err := batch.Write(); err != nil {
-		log().Error("Failed to write trie to disk", "err", err)
+		logger().Error("Failed to write trie to disk", "err", err)
 		return err
 	}
 	// Uncache any leftovers in the last batch
@@ -694,12 +694,10 @@ func (db *Database) Commit(node types.Hash, report bool) error {
 	db.preimages = make(map[types.Hash][]byte)
 	db.preimagesSize = 0
 
-	logger1 := log().Info
-	if !report {
-		logger1 = log().Debug
+	if report {
+		logger().Debug("Persisted trie from memory database", "nodes", nodes-len(db.dirties)+int(db.flushnodes), "size", storage-db.dirtiesSize+db.flushsize, "time", time.Since(start)+db.flushtime,
+			"gcnodes", db.gcnodes, "gcsize", db.gcsize, "gctime", db.gctime, "livenodes", len(db.dirties), "livesize", db.dirtiesSize)
 	}
-	logger1("Persisted trie from memory database", "nodes", nodes-len(db.dirties)+int(db.flushnodes), "size", storage-db.dirtiesSize+db.flushsize, "time", time.Since(start)+db.flushtime,
-		"gcnodes", db.gcnodes, "gcsize", db.gcsize, "gctime", db.gctime, "livenodes", len(db.dirties), "livesize", db.dirtiesSize)
 
 	// Reset the garbage collection statistics
 	db.gcnodes, db.gcsize, db.gctime = 0, 0, 0

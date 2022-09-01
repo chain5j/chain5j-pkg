@@ -28,7 +28,7 @@ import (
 	"testing/quick"
 
 	"github.com/chain5j/chain5j-pkg/codec/rlp"
-	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
+	"github.com/chain5j/chain5j-pkg/crypto/keccak"
 	"github.com/chain5j/chain5j-pkg/database/kvstore/memorydb"
 	"github.com/chain5j/chain5j-pkg/types"
 	"github.com/davecgh/go-spew/spew"
@@ -496,14 +496,14 @@ func BenchmarkHash(b *testing.B) {
 			nonce   = uint64(random.Int63())
 			balance = new(big.Int).Rand(random, new(big.Int).Exp(big.NewInt(2), big.NewInt(256), nil))
 			root    = emptyRoot
-			code    = sha3.Keccak256(nil)
+			code    = keccak.Keccak256(nil)
 		)
 		accounts[i], _ = rlp.EncodeToBytes([]interface{}{nonce, balance, root, code})
 	}
 	// Insert the accounts into the trie and hash it
 	trie := newEmpty()
 	for i := 0; i < len(addresses); i++ {
-		trie.Update(sha3.Keccak256(addresses[i][:]), accounts[i])
+		trie.Update(keccak.Keccak256(addresses[i][:]), accounts[i])
 	}
 	b.ResetTimer()
 	b.ReportAllocs()
@@ -545,4 +545,24 @@ func TestDecodeNode(t *testing.T) {
 		rand.Read(elems)
 		decodeNode(hash, elems)
 	}
+}
+
+func TestRang(t *testing.T) {
+	trie := newEmpty()
+	updateString(trie, "1", "1")
+	updateString(trie, "2", "2")
+	updateString(trie, "3", "3")
+	t.Logf("顺序处理：%s", trie.Hash().Hex())
+
+	trie = newEmpty()
+	updateString(trie, "3", "3")
+	updateString(trie, "2", "2")
+	updateString(trie, "1", "1")
+	t.Logf("逆序处理：%s", trie.Hash().Hex())
+
+	trie = newEmpty()
+	updateString(trie, "2", "2")
+	updateString(trie, "3", "3")
+	updateString(trie, "1", "1")
+	t.Logf("错序处理：%s", trie.Hash().Hex())
 }

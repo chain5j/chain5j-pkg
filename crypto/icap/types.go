@@ -9,7 +9,7 @@ type Customer struct {
 	currency  string `json:"currency"`  // 资产标识符
 	orgCode   string `json:"orgCode"`   // 机构标识符
 	resultLen int    `json:"resultLen"` // 机构客户标识符base36的标准长度+currencyLen+orgCodeLen+2位校验码 如果长度不足时，base36会进行补0
-	customer  string `json:"customer"`  // 机构客户标识符[16进制]
+	customer  []byte `json:"customer"`  // 机构客户标识符[16进制]
 }
 
 type IBanInfo struct {
@@ -19,7 +19,7 @@ type IBanInfo struct {
 	iban        string `json:"iban"`        // iban标识
 }
 
-func NewCustomer(currency, orgCode string, resultLen int, customer string) *Customer {
+func NewCustomer(currency, orgCode string, resultLen int, customer []byte) *Customer {
 	return &Customer{
 		currency:  currency,
 		orgCode:   orgCode,
@@ -48,7 +48,7 @@ func (c *Customer) ResultLen() int {
 	return c.resultLen
 }
 
-func (c *Customer) Customer() string {
+func (c *Customer) Customer() []byte {
 	return c.customer
 }
 

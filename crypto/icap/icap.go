@@ -1,6 +1,7 @@
 // Package icap
 //
 // @author: xwc1125
+// @date: 2021/4/14
 package icap
 
 import (
@@ -10,12 +11,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/chain5j/chain5j-pkg/crypto/base/base36"
 	"github.com/chain5j/chain5j-pkg/types"
-	"github.com/chain5j/chain5j-pkg/util/hexutil"
 )
 
 var (
-	Base36Chars        = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	errICAPLength      = errors.New("invalid ICAP length")
 	errICAPEncoding    = errors.New("invalid ICAP encoding")
 	errICAPChecksum    = errors.New("invalid ICAP checksum")
@@ -27,49 +27,44 @@ var (
 
 var (
 	Big1  = big.NewInt(1)
-	Big0  = big.NewInt(0)
-	Big36 = big.NewInt(36)
 	Big97 = big.NewInt(97)
 	Big98 = big.NewInt(98)
 )
 
 func ToICAP(customer Customer) (*IBanInfo, error) {
-	cBytes, err := hexutil.Decode(customer.Customer())
-	if err != nil {
-		return nil, err
-	}
-	enc := Base36Encode(new(big.Int).SetBytes(cBytes))
+	enc := base36.EncodeBytes(customer.Customer())
 	currencyLen := len(customer.Currency())
 	orgCodeLen := len(customer.OrgCode())
 	// 减去2位校验码
-	ibanLen := customer.ResultLen() - currencyLen - orgCodeLen - 2
-	if len(enc) < ibanLen {
-		enc = join(strings.Repeat("0", ibanLen-len(enc)), enc)
+	interLen := customer.ResultLen() - currencyLen - orgCodeLen - 2 - len(enc)
+	if interLen > 0 {
+		enc = join(strings.Repeat("0", interLen), enc)
 	}
 	icap := join(customer.Currency(), checkDigits(customer.Currency(), customer.OrgCode(), enc), customer.OrgCode(), enc)
 	return NewIBanInfo(currencyLen, orgCodeLen, len(customer.customer), icap), nil
 }
 
 func ParseICAP(iban IBanInfo) (*Customer, error) {
-	if err := validCheckSumWithLen(iban.currencyLen, iban.orgCodeLen, iban.iban); err != nil {
+	if err := ValidCheckSumWithLen(iban.currencyLen, iban.orgCodeLen, iban.iban); err != nil {
 		return nil, err
 	}
 	// checksum is ISO13616, Ethereum address is base-36
 	l := iban.currencyLen + 2 + iban.orgCodeLen
-	bigAddr, _ := new(big.Int).SetString(iban.iban[l:], 36)
-	hex := hexutil.EncodeBig(bigAddr)
+	// bigAddr, _ := new(big.Int).SetString(iban.iban[l:], 36)
+	// hex := hexutil.EncodeBig(bigAddr)
+	bytes := base36.DecodeToBytes(true, iban.iban[l:])
 	return &Customer{
 		currency:  iban.iban[:iban.currencyLen],
 		orgCode:   iban.iban[iban.currencyLen+2 : iban.currencyLen+2+iban.orgCodeLen],
-		resultLen: len(hex),
-		customer:  hex,
+		resultLen: len(bytes) + 2,
+		customer:  bytes,
 	}, nil
 }
 
 //export ConvertAddressToICAP
 func ConvertAddressToICAP(prefix string, orgCode string, a types.Address) string {
 	prefix = strings.ToUpper(prefix)
-	enc := Base36Encode(a.Big())
+	enc := base36.EncodeBytes(a.Bytes())
 	// zero padd encoded address to Direct ICAP length if needed
 	if len(enc) < 31 {
 		enc = join(strings.Repeat("0", 31-len(enc)), enc)
@@ -103,13 +98,12 @@ func ConvertICAPToAddress(prefix string, orgCodeLen int, s string) (types.Addres
 		return types.Address{}, errICAPLength
 	}
 }
-
 func parseSelfICAP(prefix string, orgCodeLen int, s string) (types.Address, error) {
 	if !strings.HasPrefix(s, prefix) {
 		return types.Address{}, errICAPCountryCode
 	}
 	if orgCodeLen > 0 {
-		if err := validCheckSumWithLen(len(prefix), orgCodeLen, s); err != nil {
+		if err := ValidCheckSumWithLen(len(prefix), orgCodeLen, s); err != nil {
 			return types.Address{}, err
 		}
 	} else {
@@ -122,7 +116,6 @@ func parseSelfICAP(prefix string, orgCodeLen int, s string) (types.Address, erro
 	bigAddr, _ := new(big.Int).SetString(s[l:], 36)
 	return types.BigToAddress(bigAddr), nil
 }
-
 func parseICAP(prefix string, s string) (types.Address, error) {
 	if !strings.HasPrefix(s, prefix) {
 		return types.Address{}, errICAPCountryCode
@@ -134,7 +127,6 @@ func parseICAP(prefix string, s string) (types.Address, error) {
 	bigAddr, _ := new(big.Int).SetString(s[4:], 36)
 	return types.BigToAddress(bigAddr), nil
 }
-
 func parseIndirectICAP(prefix string, s string) (types.Address, error) {
 	if !strings.HasPrefix(s, prefix) {
 		return types.Address{}, errICAPCountryCode
@@ -162,7 +154,7 @@ func validCheckSum(s string) error {
 	return nil
 }
 
-func validCheckSumWithLen(prefixLen, orgCodeLen int, s string) error {
+func ValidCheckSumWithLen(prefixLen, orgCodeLen int, s string) error {
 	// s=prefix+check+orgCode+addr
 	l := prefixLen + 2
 	s1 := join(s[l:], s[:prefixLen], s[prefixLen:prefixLen+2]) // orgCode+addr+prefix+check
@@ -194,11 +186,13 @@ func checkDigits(prefix, orgCode, s string) string {
 // not base-36, but expansion to decimal literal: A = 10, B = 11, ... Z = 35
 func iso13616Expand(s string) (string, error) {
 	var parts []string
-	if !validBase36(s) {
-		return "", errICAPEncoding
-	}
 	for _, c := range s {
 		i := uint64(c)
+		// 0-9 or A-Z
+		if i < 48 || (i > 57 && i < 65) || i > 90 {
+			return "", errICAPEncoding
+		}
+
 		if i > 97 {
 			parts = append(parts, strconv.FormatUint(uint64(c)-87, 10))
 		} else if i >= 65 {
@@ -208,38 +202,6 @@ func iso13616Expand(s string) (string, error) {
 		}
 	}
 	return join(parts...), nil
-}
-
-func Base36Encode(i *big.Int) string {
-	var chars []rune
-	x := new(big.Int)
-	for {
-		x.Mod(i, Big36)
-		chars = append(chars, rune(Base36Chars[x.Uint64()]))
-		i.Div(i, Big36)
-		if i.Cmp(Big0) == 0 {
-			break
-		}
-	}
-	// reverse slice
-	for i, j := 0, len(chars)-1; i < j; i, j = i+1, j-1 {
-		chars[i], chars[j] = chars[j], chars[i]
-	}
-	return string(chars)
-}
-
-// 0~9==>48~57
-// A~Z==>65~90
-// a~z==>97~122
-func validBase36(s string) bool {
-	for _, c := range s {
-		i := uint64(c)
-		// 0-9 or A-Z
-		if i < 48 || (i > 57 && i < 65) || i > 90 {
-			return false
-		}
-	}
-	return true
 }
 
 func join(s ...string) string {

@@ -41,6 +41,18 @@ type Compacter interface {
 	Compact(start []byte, limit []byte) error
 }
 
+// KeyValueStore contains all the methods required to allow handling different
+// key-value data stores backing the high level database.
+type KeyValueStore interface {
+	KeyValueReader
+	KeyValueWriter
+	Batcher
+	Iteratee
+	Stater
+	Compacter
+	io.Closer
+}
+
 // Reader contains the methods required to read data from both key-value as well as
 // immutable ancient data.
 type Reader interface {
