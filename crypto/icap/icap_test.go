@@ -35,7 +35,7 @@ func TestIban(t *testing.T) {
 		currency:  "chain5j",
 		orgCode:   "0000",
 		resultLen: 60,
-		customer:  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+		customer:  types.HexToHash("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff").Bytes(),
 	})
 	if err != nil {
 		panic(err)
