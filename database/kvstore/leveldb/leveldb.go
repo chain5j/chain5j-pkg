@@ -9,12 +9,17 @@ import (
 
 	"github.com/chain5j/chain5j-pkg/database/kvstore"
 	"github.com/chain5j/chain5j-pkg/types"
+	"github.com/chain5j/chain5j-pkg/util/hexutil"
 	"github.com/chain5j/logger"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/filter"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/util"
+)
+
+var (
+	EnableLogPrint = false
 )
 
 const (
@@ -59,8 +64,7 @@ func New(file string, cache int, handles int, namespace string) (*Database, erro
 		handles = minHandles
 	}
 	logger := logger.New("levelDB")
-	logger.Info("allocated cache and file handles", "database", file, "cache", types.StorageSize(cache*1024*1024), "handles", handles)
-
+	logger.Debug("Allocated cache and file handles", "database", file, "cache", types.StorageSize(cache*1024*1024), "handles", handles)
 	// Open the db and recover any potential corruptions
 	db, err := leveldb.OpenFile(file, &opt.Options{
 		OpenFilesCacheCapacity: handles,
@@ -68,6 +72,7 @@ func New(file string, cache int, handles int, namespace string) (*Database, erro
 		WriteBuffer:            cache / 4 * opt.MiB, // Two of these are used internally
 		Filter:                 filter.NewBloomFilter(10),
 		DisableSeeksCompaction: true,
+		// Compression:            opt.NoCompression,
 	})
 	if _, corrupted := err.(*errors.ErrCorrupted); corrupted {
 		db, err = leveldb.RecoverFile(file, nil)
@@ -116,6 +121,9 @@ func (db *Database) Get(key []byte) ([]byte, error) {
 	dat, err := db.db.Get(key, nil)
 	if err != nil {
 		return nil, err
+	}
+	if EnableLogPrint {
+		fmt.Println("leveldb database get", "key", hexutil.Encode(key), "val", hexutil.Encode(dat))
 	}
 	return dat, nil
 }
@@ -368,7 +376,7 @@ func (b *batch) Put(key, value []byte) error {
 // Delete inserts the a key removal into the batch for later committing.
 func (b *batch) Delete(key []byte) error {
 	b.b.Delete(key)
-	b.size++
+	b.size += len(key)
 	return nil
 }
 
