@@ -4,9 +4,8 @@
 package icap
 
 import (
-	"math/big"
-
 	"github.com/chain5j/chain5j-pkg/codec/json"
+	"github.com/chain5j/chain5j-pkg/crypto/base/base36"
 	"github.com/chain5j/chain5j-pkg/types"
 )
 
@@ -24,7 +23,7 @@ func THashFromIban(tHash string) (THash, error) {
 	if err != nil {
 		return THash{}, err
 	}
-	hash := types.HexToHash(customer.Customer())
+	hash := types.BytesToHash(customer.Customer())
 	return THash{
 		ChainName: customer.Currency(),
 		Index:     0,
@@ -34,12 +33,12 @@ func THashFromIban(tHash string) (THash, error) {
 
 // String tHash的值
 func (h THash) String() string {
-	indexBase36 := Base36Encode(big.NewInt(int64(h.Index)))
+	indexBase36 := base36.Encode(uint64(h.Index))
 	customer := NewCustomer(
 		h.ChainName,
 		LeftJoin(indexBase36, 4),
 		60,
-		h.Hash.Hex())
+		h.Hash.Bytes())
 	iBanInfo, _ := ToICAP(*customer)
 	return iBanInfo.Iban()
 }

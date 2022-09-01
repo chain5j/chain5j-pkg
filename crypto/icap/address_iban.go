@@ -29,7 +29,7 @@ func NewAddressPretty(chainName string, address types.Address) addressPretty {
 		chainName,
 		"",
 		AddressPrettyLen,
-		address.Hex())
+		address.Bytes())
 	iBanInfo, err := ToICAP(*customer)
 	if err != nil {
 		return EmptyAddressPretty
@@ -50,7 +50,7 @@ func AddressPrettyFromIban(tAddr string) (addressPretty, error) {
 	if err != nil {
 		return addressPretty{}, err
 	}
-	address := types.HexToAddress(customer.Customer())
+	address := types.BytesToAddress(customer.Customer())
 	return addressPretty{
 		ChainName: customer.Currency(),
 		Addr:      address,
