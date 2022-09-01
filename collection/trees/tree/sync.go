@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/chain5j/chain5j-pkg/collection/queues/preque"
+	prque "github.com/chain5j/chain5j-pkg/collection/queues/preque"
 	"github.com/chain5j/chain5j-pkg/database/kvstore"
 	"github.com/chain5j/chain5j-pkg/types"
 )

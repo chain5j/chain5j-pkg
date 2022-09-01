@@ -1,4 +1,4 @@
-// Package kvstore
+// Package kvstore 批量处理
 //
 // @author: xwc1125
 package kvstore

@@ -22,7 +22,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
+	"github.com/chain5j/chain5j-pkg/crypto/keccak"
 	"github.com/chain5j/chain5j-pkg/database/kvstore/memorydb"
 	"github.com/chain5j/chain5j-pkg/types"
 	"github.com/chain5j/chain5j-pkg/util/hexutil"
@@ -96,7 +96,7 @@ func TestSecureGetKey(t *testing.T) {
 
 	key := []byte("foo")
 	value := []byte("bar")
-	seckey := sha3.Keccak256(key)
+	seckey := keccak.Keccak256(key)
 
 	if !bytes.Equal(trie.Get(key), value) {
 		t.Errorf("Get did not return bar")

@@ -3,8 +3,8 @@
 // @author: xwc1125
 package tree
 
-import "github.com/chain5j/logger"
+import log "github.com/chain5j/logger"
 
-func log() logger.Logger {
-	return logger.New("tree")
+func logger() log.Logger {
+	return log.Log("tree")
 }
