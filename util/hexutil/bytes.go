@@ -21,12 +21,12 @@ func FromHex(s string) []byte {
 
 // Bytes2Hex returns the hexadecimal encoding of d.
 func Bytes2Hex(d []byte) string {
-	return hex.EncodeToString(d)
+	return Encode(d)
 }
 
 // Hex2Bytes returns the bytes represented by the hexadecimal string str.
 func Hex2Bytes(str string) []byte {
-	h, _ := hex.DecodeString(str)
+	h, _ := Decode(str)
 	return h
 }
 
