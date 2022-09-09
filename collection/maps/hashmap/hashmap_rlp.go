@@ -87,9 +87,9 @@ func StringToByteSizesHookFunc(
 			}
 			switch {
 			case desKind == reflect.Uint:
-				return convutil.BytesToUint64(uints)
+				return convutil.BytesToUint64(uints), nil
 			case desKind == reflect.Int:
-				return convutil.BytesToInt64(uints)
+				return convutil.BytesToInt64(uints), nil
 			case desKind == reflect.Bool:
 				return convutil.BytesToBool(uints)
 			default:
