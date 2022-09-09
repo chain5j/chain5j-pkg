@@ -73,11 +73,14 @@ func (b Bytes) String() string {
 }
 
 func (b Bytes) Bytes() []byte {
+	if b == nil {
+		return nil
+	}
 	return []byte(b)
 }
 
 func (b Bytes) Nil() bool {
-	if b == nil {
+	if b == nil || len(b) == 0 {
 		return true
 	}
 	return false
