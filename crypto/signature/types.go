@@ -10,9 +10,9 @@ import (
 
 // SignResult 签名结果
 type SignResult struct {
-	Name      string        `json:"name" mapstructure:"name"`           // 算法名称
-	PubKey    hexutil.Bytes `json:"pub_key" mapstructure:"pub_key"`     // 公钥
-	Signature hexutil.Bytes `json:"signature" mapstructure:"signature"` // 签名结果
+	Name      string        `json:"name" mapstructure:"name" validate:"required"`           // 算法名称
+	PubKey    hexutil.Bytes `json:"pubKey,omitempty" mapstructure:"pubKey"`                 // 公钥
+	Signature hexutil.Bytes `json:"signature" mapstructure:"signature" validate:"required"` // 签名结果
 }
 
 // Serialize 获取signResult的bytes
