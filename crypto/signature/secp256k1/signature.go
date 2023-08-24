@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/btcsuite/btcd/btcec"
+	"github.com/chain5j/chain5j-pkg/crypto/signature/secp256k1/btcecv1"
 )
 
 var (
@@ -23,7 +23,7 @@ func RecoverPubkey(hash, sig []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	p := (*btcec.PublicKey)(pub)
+	p := (*btcecv1.PublicKey)(pub)
 	bytes := p.SerializeUncompressed()
 	return bytes, err
 }
@@ -35,7 +35,7 @@ func SigToPub(hash, sig []byte) (*ecdsa.PublicKey, error) {
 	btcsig[0] = sig[64] + 27
 	copy(btcsig[1:], sig)
 
-	pub, _, err := btcec.RecoverCompact(btcec.S256(), btcsig, hash)
+	pub, _, err := btcecv1.RecoverCompact(btcecv1.S256(), btcsig, hash)
 	return pub.ToECDSA(), err
 }
 
@@ -51,10 +51,10 @@ func Sign(prv *ecdsa.PrivateKey, hash []byte) ([]byte, error) {
 	if len(hash) != 32 {
 		return nil, fmt.Errorf("hash is required to be exactly 32 bytes (%d)", len(hash))
 	}
-	if prv.Curve != btcec.S256() {
+	if prv.Curve != btcecv1.S256() {
 		return nil, fmt.Errorf("private key curve is not secp256k1")
 	}
-	sig, err := btcec.SignCompact(btcec.S256(), (*btcec.PrivateKey)(prv), hash, false)
+	sig, err := btcecv1.SignCompact(btcecv1.S256(), (*btcecv1.PrivateKey)(prv), hash, false)
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +66,8 @@ func Sign(prv *ecdsa.PrivateKey, hash []byte) ([]byte, error) {
 }
 
 func Verify(pub *ecdsa.PublicKey, hash []byte, signature []byte) bool {
-	sig := &btcec.Signature{R: new(big.Int).SetBytes(signature[:32]), S: new(big.Int).SetBytes(signature[32:64])}
-	key := (*btcec.PublicKey)(pub)
+	sig := &btcecv1.Signature{R: new(big.Int).SetBytes(signature[:32]), S: new(big.Int).SetBytes(signature[32:64])}
+	key := (*btcecv1.PublicKey)(pub)
 	return sig.Verify(hash, key)
 }
 
@@ -78,8 +78,8 @@ func VerifySignature(pubkey, hash, signature []byte) bool {
 	if len(signature) != 64 {
 		return false
 	}
-	sig := &btcec.Signature{R: new(big.Int).SetBytes(signature[:32]), S: new(big.Int).SetBytes(signature[32:])}
-	key, err := btcec.ParsePubKey(pubkey, btcec.S256())
+	sig := &btcecv1.Signature{R: new(big.Int).SetBytes(signature[:32]), S: new(big.Int).SetBytes(signature[32:])}
+	key, err := btcecv1.ParsePubKey(pubkey, btcecv1.S256())
 	if err != nil {
 		return false
 	}
@@ -91,7 +91,7 @@ func DecompressPubkey(pubkey []byte) (*ecdsa.PublicKey, error) {
 	if len(pubkey) != 33 {
 		return nil, errors.New("invalid compressed public key length")
 	}
-	key, err := btcec.ParsePubKey(pubkey, btcec.S256())
+	key, err := btcecv1.ParsePubKey(pubkey, btcecv1.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -100,5 +100,5 @@ func DecompressPubkey(pubkey []byte) (*ecdsa.PublicKey, error) {
 
 // CompressPubkey encodes a public key to the 33-byte compressed format.
 func CompressPubkey(pubkey *ecdsa.PublicKey) []byte {
-	return (*btcec.PublicKey)(pubkey).SerializeCompressed()
+	return (*btcecv1.PublicKey)(pubkey).SerializeCompressed()
 }
