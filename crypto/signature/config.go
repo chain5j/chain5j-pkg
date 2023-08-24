@@ -6,7 +6,7 @@ package signature
 import (
 	"crypto/elliptic"
 
-	"github.com/btcsuite/btcd/btcec"
+	"github.com/chain5j/chain5j-pkg/crypto/signature/secp256k1/btcecv1"
 	"github.com/chain5j/logger"
 	"github.com/tjfoc/gmsm/sm2"
 )
@@ -28,7 +28,7 @@ func CurveType(curveName string) elliptic.Curve {
 	case P521:
 		return elliptic.P521()
 	case S256:
-		return btcec.S256()
+		return btcecv1.S256()
 	case SM2P256:
 		return sm2.P256Sm2()
 	default:
@@ -38,7 +38,7 @@ func CurveType(curveName string) elliptic.Curve {
 }
 
 func CurveName(curve elliptic.Curve) string {
-	if curve == btcec.S256() {
+	if curve == btcecv1.S256() {
 		return S256
 	}
 	name := curve.Params().Name

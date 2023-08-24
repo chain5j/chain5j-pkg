@@ -8,13 +8,13 @@ import (
 	"crypto/elliptic"
 	"errors"
 
-	"github.com/btcsuite/btcd/btcec"
+	"github.com/chain5j/chain5j-pkg/crypto/signature/secp256k1/btcecv1"
 )
 
 func MarshalPrivateKey(key *ecdsa.PrivateKey) ([]byte, error) {
-	privateKey := btcec.PrivateKey{
+	privateKey := btcecv1.PrivateKey{
 		PublicKey: ecdsa.PublicKey{
-			Curve: btcec.S256(),
+			Curve: btcecv1.S256(),
 			X:     key.X,
 			Y:     key.Y,
 		},
@@ -24,7 +24,7 @@ func MarshalPrivateKey(key *ecdsa.PrivateKey) ([]byte, error) {
 }
 
 func UnmarshalPrivateKey(curve elliptic.Curve, data []byte) (*ecdsa.PrivateKey, error) {
-	privateKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), data)
+	privateKey, _ := btcecv1.PrivKeyFromBytes(btcecv1.S256(), data)
 	if privateKey != nil {
 		return privateKey.ToECDSA(), nil
 	}
@@ -32,7 +32,7 @@ func UnmarshalPrivateKey(curve elliptic.Curve, data []byte) (*ecdsa.PrivateKey, 
 }
 
 func MarshalPublicKey(pub *ecdsa.PublicKey) ([]byte, error) {
-	publicKey := btcec.PublicKey{
+	publicKey := btcecv1.PublicKey{
 		Curve: pub.Curve,
 		X:     pub.X,
 		Y:     pub.Y,
@@ -41,7 +41,7 @@ func MarshalPublicKey(pub *ecdsa.PublicKey) ([]byte, error) {
 }
 
 func UnmarshalPublicKey(curve elliptic.Curve, data []byte) (*ecdsa.PublicKey, error) {
-	pubKey, err := btcec.ParsePubKey(data, btcec.S256())
+	pubKey, err := btcecv1.ParsePubKey(data, btcecv1.S256())
 	if err != nil {
 		return nil, err
 	}
@@ -51,9 +51,9 @@ func UnmarshalPublicKey(curve elliptic.Curve, data []byte) (*ecdsa.PublicKey, er
 // =================x509=================
 
 func MarshalPrivateKeyX509(key *ecdsa.PrivateKey) ([]byte, error) {
-	privateKey := btcec.PrivateKey{
+	privateKey := btcecv1.PrivateKey{
 		PublicKey: ecdsa.PublicKey{
-			Curve: btcec.S256(),
+			Curve: btcecv1.S256(),
 			X:     key.X,
 			Y:     key.Y,
 		},
@@ -63,7 +63,7 @@ func MarshalPrivateKeyX509(key *ecdsa.PrivateKey) ([]byte, error) {
 }
 
 func UnmarshalPrivateKeyX509(curve elliptic.Curve, data []byte) (*ecdsa.PrivateKey, error) {
-	privateKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), data)
+	privateKey, _ := btcecv1.PrivKeyFromBytes(btcecv1.S256(), data)
 	if privateKey != nil {
 		return privateKey.ToECDSA(), nil
 	}

@@ -10,9 +10,9 @@ import (
 	"crypto/rand"
 	"hash"
 
-	"github.com/btcsuite/btcd/btcec"
 	crypto2 "github.com/chain5j/chain5j-pkg/crypto"
 	"github.com/chain5j/chain5j-pkg/crypto/hashalg/sha3"
+	"github.com/chain5j/chain5j-pkg/crypto/signature/secp256k1/btcecv1"
 )
 
 var (
@@ -39,21 +39,20 @@ func (s Secp251k1) HashMsg(cryptoName string, data []byte) ([]byte, error) {
 }
 
 func (s Secp251k1) ToECDSA(prv crypto.PrivateKey) *ecdsa.PrivateKey {
-	privateKey := prv.(*btcec.PrivateKey)
-	return privateKey.ToECDSA()
+	return prv.(*btcecv1.PrivateKey).ToECDSA()
 }
 
 func (s Secp251k1) FromECDSA(prv *ecdsa.PrivateKey) crypto.PrivateKey {
-	return (*btcec.PrivateKey)(prv)
+	return (*btcecv1.PrivateKey)(prv)
 }
 
 func (s Secp251k1) ToECDSAPubKey(pub crypto.PublicKey) *ecdsa.PublicKey {
-	publicKey := pub.(*btcec.PublicKey)
+	publicKey := pub.(*btcecv1.PublicKey)
 	return publicKey.ToECDSA()
 }
 
 func (s Secp251k1) FromECDSAPubKey(pub *ecdsa.PublicKey) crypto.PublicKey {
-	return (*btcec.PublicKey)(pub)
+	return (*btcecv1.PublicKey)(pub)
 }
 
 func (s Secp251k1) MarshalPrivateKey(key *ecdsa.PrivateKey) ([]byte, error) {
